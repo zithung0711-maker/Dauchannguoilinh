@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dấu Chân Người Lính - Không Gian Lịch Sử</title>
+  <!-- Nhúng Font chữ đứng khỏe khoắn giống bìa "DẤU CHÂN NGƯỜI LÍNH" và Font sách cổ -->
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* --- CẤU HÌNH HÌNH NỀN SỐ 5 --- */
+      --bg-image: url('image_c440bd.jpg');
+      --bg-darkness: 0.80;
+      --bg-contrast: 120%;
+      --bg-brightness: 85%;
+
+      /* --- 1. GÓC TRÊN TRÁI: HUY HIỆU ĐOÀN --- */
+      --tl-size: 135px;
+      --tl-offset-x: 24px;
+      --tl-offset-y: 24px;
+      --tl-brightness: 100%;
+      --tl-contrast: 105%;
+      --tl-opacity: 0.90;
+      --tl-blur: 0px;
+      --tl-zoom: 1.35;
+      --tl-radius: 0px;
+
+      /* --- 2. GÓC TRÊN PHẢI: CỜ VIỆT NAM --- */
+      --tr-size: 170px;
+      --tr-offset-x: 24px;
+      --tr-offset-y: 24px;
+      --tr-brightness: 100%;
+      --tr-contrast: 110%;
+      --tr-opacity: 0.85;
+      --tr-blur: 0px;
+      --tr-zoom: 1.45;
+      --tr-radius: 16px;
+
+      /* --- 3. GÓC DƯỚI TRÁI: TRỐNG ĐỒNG --- */
+      --bl-size: 200px;
+      --bl-offset-x: 24px;
+      --bl-offset-y: 24px;
+      --bl-brightness: 85%;
+      --bl-contrast: 190%;
+      --bl-opacity: 0.35;
+      --bl-blur: 1.2px;
+      --bl-zoom: 1.45;
+      --bl-radius: 50%;
+
+      /* --- 4. GÓC DƯỚI PHẢI: TƯỢNG CHIẾN SĨ --- */
+      --br-size: 200px;
+      --br-offset-x: 24px;
+      --br-offset-y: 16px;
+      --br-brightness: 100%;
+      --br-contrast: 108%;
+      --br-opacity: 0.92;
+      --br-blur: 0px;
+      --br-zoom: 1.35;
+      --br-radius: 0px;
+
+      /* Tọa độ ánh đèn pin rọi vào sách */
+      --spot-x: 50%;
+      --spot-y: 50%;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #05070b;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      color: #e2e8f0;
+    }
+
+    /* HÌNH NỀN SỐ 5 */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      background-image: var(--bg-image);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: grayscale(100%) contrast(var(--bg-contrast)) brightness(var(--bg-brightness));
+      z-index: 1;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(
+        circle at center,
+        rgba(15, 23, 42, calc(var(--bg-darkness) - 0.15)) 0%,
+        rgba(5, 8, 17, var(--bg-darkness)) 70%,
+        rgba(0, 0, 0, 0.96) 100%
+      );
+      z-index: 2;
+    }
+
+    /* =====================================================================
+       LỚP HIỆU ỨNG ĐÈN PIN (FLASHLIGHT SPOTLIGHT) KHI ĐANG ĐỌC SÁCH
+       Làm tối sầm toàn bộ xung quanh, chỉ rọi sáng vùng cuốn sách ở giữa
+       ===================================================================== */
+    .flashlight-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 18;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      background: radial-gradient(
+        circle 520px at var(--spot-x) var(--spot-y),
+        rgba(255, 243, 199, 0.12) 0%,
+        rgba(251, 191, 36, 0.05) 35%,
+        rgba(5, 7, 12, 0.88) 68%,
+        rgba(0, 0, 0, 0.98) 100%
+      );
+    }
+
+    body.reading-mode .flashlight-overlay {
+      opacity: 1;
+    }
+
+    /* Khi đang đọc sách, làm tối nhẹ 4 góc để tập trung hoàn toàn vào sách */
+    body.reading-mode .corner-wrapper {
+      filter: brightness(0.25) blur(1px);
+      pointer-events: none;
+    }
+
+    /* KHUNG BAO CHUNG CHO 4 GÓC */
+    .corner-wrapper {
+      position: fixed;
+      z-index: 10;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center center;
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                  filter 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    body.edit-mode .corner-wrapper {
+      cursor: move;
+      outline: 2px dashed rgba(250, 204, 21, 0.75);
+      outline-offset: 6px;
+      transition: none;
+    }
+    body.edit-mode .corner-wrapper.selected-target {
+      outline: 2px solid #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    .resize-handle {
+      display: none;
+      position: absolute;
+      bottom: -8px;
+      right: -8px;
+      width: 18px;
+      height: 18px;
+      background: #facc15;
+      border: 2px solid #0f172a;
+      border-radius: 50%;
+      cursor: nwse-resize;
+      z-index: 40;
+      box-shadow: 0 0 8px rgba(0,0,0,0.8);
+    }
+    body.edit-mode .resize-handle {
+      display: block;
+    }
+
+    .corner-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      transition: filter 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                  border-radius 0.3s ease;
+    }
+
+    /* 1. Góc trên trái: Huy hiệu Đoàn */
+    .wrap-tl { top: var(--tl-offset-y); left: var(--tl-offset-x); width: var(--tl-size); }
+    .wrap-tl .corner-img {
+      opacity: var(--tl-opacity);
+      border-radius: var(--tl-radius);
+      filter: brightness(var(--tl-brightness)) contrast(var(--tl-contrast)) blur(var(--tl-blur))
+              drop-shadow(0 4px 12px rgba(0, 0, 0, 0.65));
+    }
+    .wrap-tl:hover { transform: scale(1.08); }
+
+    /* 2. Góc trên phải: Cờ Việt Nam */
+    .wrap-tr {
+      top: var(--tr-offset-y);
+      right: var(--tr-offset-x);
+      width: var(--tr-size);
+      perspective: 600px;
+      border-radius: var(--tr-radius);
+    }
+    .flag-clip-box {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: var(--tr-radius);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wrap-tr .tr-static {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: var(--tr-radius);
+      opacity: var(--tr-opacity);
+      filter: brightness(var(--tr-brightness)) contrast(var(--tr-contrast)) blur(var(--tr-blur))
+              drop-shadow(0 4px 12px rgba(0, 0, 0, 0.65));
+    }
+    .wrap-tr .tr-media {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: var(--tr-radius);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .wrap-tr.flag-active {
+      z-index: 30;
+      transform: scale(var(--tr-zoom)) translateY(-25px);
+      filter: drop-shadow(0 60px 25px rgba(0, 0, 0, 0.85))
+              drop-shadow(0 0 18px rgba(250, 204, 21, 0.45));
+    }
+    .wrap-tr.flag-active .tr-static { opacity: 0; }
+    .wrap-tr.flag-active .tr-media.active-media { opacity: 1; }
+    .wrap-tr.flag-active .tr-media.auto-wave-fallback {
+      filter: saturate(135%) contrast(112%) brightness(106%) url(#waving-filter);
+      animation: smoothFlagWave 2.8s ease-in-out infinite;
+    }
+
+    @keyframes smoothFlagWave {
+      0%   { transform: rotateY(0deg) skewY(0deg) scale(1.02); }
+      25%  { transform: rotateY(-10deg) skewY(2deg) scale(1.04); }
+      50%  { transform: rotateY(4deg) skewY(-2deg) scale(1.02); }
+      75%  { transform: rotateY(10deg) skewY(1.5deg) scale(1.04); }
+      100% { transform: rotateY(0deg) skewY(0deg) scale(1.02); }
+    }
+
+    /* 3. Góc dưới trái: Trống đồng */
+    .wrap-bl {
+      bottom: var(--bl-offset-y);
+      left: var(--bl-offset-x);
+      width: var(--bl-size);
+      height: var(--bl-size);
+      border-radius: 50%;
+    }
+    .wrap-bl .corner-img {
+      opacity: var(--bl-opacity);
+      filter: grayscale(100%) invert(1) brightness(var(--bl-brightness))
+              contrast(var(--bl-contrast)) blur(var(--bl-blur))
+              drop-shadow(1px 1px 0px rgba(226, 232, 240, 0.45))
+              drop-shadow(-2px -2px 3px rgba(0, 0, 0, 0.95));
+    }
+    .wrap-bl.drum-active {
+      z-index: 30;
+      transform: scale(var(--bl-zoom)) translateY(-25px);
+      filter: drop-shadow(0 60px 25px rgba(0, 0, 0, 0.85))
+              drop-shadow(0 0 20px rgba(250, 204, 21, 0.4));
+    }
+    .wrap-bl.drum-active .corner-img {
+      opacity: 1;
+      filter: grayscale(100%) invert(1) sepia(100%) saturate(750%) hue-rotate(6deg)
+              brightness(125%) contrast(155%) blur(0px)
+              drop-shadow(0 0 12px rgba(250, 204, 21, 0.95));
+      animation: rotateDrumCircleReverse 10s linear infinite;
+    }
+
+    @keyframes rotateDrumCircleReverse {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(-360deg); }
+    }
+
+    /* 4. Góc dưới phải: Tượng chiến sĩ */
+    .wrap-br { bottom: var(--br-offset-y); right: var(--br-offset-x); width: var(--br-size); }
+    .wrap-br .corner-img {
+      opacity: var(--br-opacity);
+      border-radius: var(--br-radius);
+      filter: brightness(var(--br-brightness)) contrast(var(--br-contrast)) blur(var(--br-blur))
+              drop-shadow(0 6px 16px rgba(0, 0, 0, 0.75));
+    }
+    .wrap-br:hover { transform: scale(1.06); }
+
+    /* =====================================================================
+       KHUNG SÂN KHẤU CHÍNH GIỮA & CUỐN SÁCH NÂU ĐẤT - GIẤY VÀNG NGẢ
+       ===================================================================== */
+    .main-stage {
+      position: relative;
+      z-index: 25;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .book-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      border-radius: 12px;
+      transition: transform 0.6s ease, filter 0.6s ease;
+      filter: drop-shadow(0 30px 45px rgba(0, 0, 0, 0.9));
+    }
+
+    /* Hiệu ứng rọi đèn pin sáng ấm trực tiếp lên mặt sách khi đang đọc */
+    body.reading-mode .book-wrapper {
+      filter: drop-shadow(0 35px 60px rgba(0, 0, 0, 0.95))
+              drop-shadow(0 0 65px rgba(251, 191, 36, 0.22));
+    }
+
+    /* BÌA SÁCH MÀU NÂU ĐẤT DA CỔ ĐIỂN (Giống hình mẫu số 2) */
+    .page.page-cover {
+      background:
+        radial-gradient(circle at 35% 25%, #6d3b27 0%, #4a2516 55%, #2b130a 100%);
+      color: #f3ead3;
+      border-radius: 4px 10px 10px 4px;
+      border: 2px solid #230f07;
+      box-shadow:
+        inset 18px 0 28px rgba(0, 0, 0, 0.75),
+        inset -3px 0 8px rgba(255, 215, 130, 0.15);
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Gân gáy sách da nâu đất có vạch chỉ vàng bên trái bìa */
+    .cover-spine {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 26px;
+      background: linear-gradient(90deg, #1c0b05 0%, #4e2718 50%, #240f07 100%);
+      border-right: 2px solid rgba(212, 175, 55, 0.45);
+      box-shadow: 3px 0 10px rgba(0,0,0,0.6);
+      z-index: 2;
+    }
+    .cover-spine::before {
+      content: "";
+      position: absolute;
+      inset: 40px 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 65px,
+        rgba(218, 178, 78, 0.65) 65px,
+        rgba(218, 178, 78, 0.65) 68px,
+        transparent 68px,
+        transparent 73px,
+        rgba(218, 178, 78, 0.65) 73px,
+        rgba(218, 178, 78, 0.65) 76px
+      );
+    }
+
+    /* Khung viền chỉ vàng kép trên bìa nâu đất */
+    .cover-gold-frame {
+      position: relative;
+      z-index: 3;
+      width: calc(100% - 14px);
+      height: 100%;
+      margin-left: 14px;
+      border: 2px solid rgba(214, 176, 84, 0.68);
+      outline: 1px solid rgba(214, 176, 84, 0.38);
+      outline-offset: -7px;
+      padding: 28px 22px 20px 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    /* TIÊU ĐỀ "DẤU CHÂN NGƯỜI LÍNH" (Font chữ đứng khỏe giống hình mẫu số 1) */
+    .book-main-title {
+      font-family: 'Anton', 'Oswald', Impact, sans-serif;
+      font-size: 3.3rem;
+      line-height: 1.08;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #e9e2ce;
+      text-shadow:
+        0 3px 0 #2a1208,
+        0 6px 14px rgba(0, 0, 0, 0.85);
+      cursor: pointer;
+      transition: color 0.35s ease, text-shadow 0.35s ease, transform 0.35s ease;
+      margin-top: 8px;
+      user-select: none;
+    }
+
+    /* Khi đưa con trỏ chuột vô chữ: Hiện sáng chữ lên rực rỡ */
+    .book-main-title:hover {
+      color: #fffbeb;
+      transform: scale(1.03);
+      text-shadow:
+        0 0 12px rgba(254, 240, 138, 0.95),
+        0 0 28px rgba(250, 204, 21, 0.85),
+        0 0 50px rgba(245, 158, 11, 0.7),
+        0 3px 2px #1c0a04;
+    }
+
+    /* Khung hình ảnh người lính trên bìa (Có thể thêm/thay ảnh bất kỳ lúc nào) */
+    .cover-soldier-box {
+      width: 78%;
+      height: 230px;
+      margin: 10px 0;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      border: 1px dashed rgba(214, 176, 84, 0.35);
+      background: rgba(20, 8, 4, 0.25);
+    }
+
+    .cover-soldier-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.7));
+      transition: transform 0.4s ease;
+    }
+    .cover-soldier-box:hover img {
+      transform: scale(1.04);
+    }
+
+    .soldier-placeholder-text {
+      font-size: 12px;
+      color: rgba(214, 176, 84, 0.55);
+      font-style: italic;
+      padding: 10px;
+    }
+
+    /* Hàng cuối bìa sách & Chữ "ĐỌC" viết kiểu chìm chìm ở góc dưới */
+    .cover-footer {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-end;
+      padding-top: 6px;
+    }
+
+    . sunken-read-btn {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.25rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      /* Hiệu ứng chữ khắc chìm (Debossed / Sunken) vào nền da nâu đất */
+      color: rgba(42, 19, 10, 0.88);
+      text-shadow:
+        1px 1px 1px rgba(235, 200, 140, 0.28),
+        -1px -1px 1px rgba(0, 0, 0, 0.9);
+      background: rgba(24, 10, 5, 0.35);
+      border: 1px solid rgba(214, 176, 84, 0.18);
+      box-shadow:
+        inset 2px 2px 5px rgba(0, 0, 0, 0.85),
+        inset -1px -1px 2px rgba(255, 220, 160, 0.12);
+      padding: 6px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.35s ease;
+      user-select: none;
+    }
+
+    /* Khi đưa chuột vào chữ ĐỌC hoặc nhấn vào: Sáng nhẹ lên để biết có thể bấm */
+    .sunken-read-btn:hover {
+      color: #fde68a;
+      border-color: rgba(250, 204, 21, 0.6);
+      text-shadow: 0 0 12px rgba(250, 204, 21, 0.85);
+      box-shadow:
+        inset 1px 1px 3px rgba(0, 0, 0, 0.6),
+        0 0 15px rgba(250, 204, 21, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* =====================================================================
+       GIẤY BÊN TRONG MÀU VÀNG NGẢ CỔ ĐIỂN (Giống hình mẫu số 3)
+       ===================================================================== */
+    .page.page-inner {
+      background:
+        radial-gradient(circle at center, #f6ebd1 0%, #ead7b1 68%, #d6bc8b 100%);
+      color: #2c1d11;
+      font-family: 'Merriweather', Georgia, serif;
+      padding: 32px 36px;
+      border: 1px solid #bfa372;
+      /* Hiệu ứng mép giấy nhiều lớp & bóng đổ sâu ở rãnh gáy sách */
+      box-shadow:
+        inset 0 0 35px rgba(138, 98, 45, 0.28),
+        inset 12px 0 22px rgba(0, 0, 0, 0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .page-header {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #785a37;
+      border-bottom: 1px solid rgba(120, 90, 55, 0.35);
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .page-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.55rem;
+      color: #4a2511;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Khung chèn ảnh minh họa bên trong trang sách */
+    .page-photo-frame {
+      width: 100%;
+      height: 195px;
+      background: rgba(120, 90, 55, 0.12);
+      border: 2px solid #b59663;
+      padding: 6px;
+      border-radius: 4px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    }
+
+    .page-photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: sepia(22%) contrast(105%);
+    }
+
+    .page-text {
+      font-size: 0.94rem;
+      line-height: 1.72;
+      text-align: justify;
+      color: #2e1d0f;
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .page-footer {
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(120, 90, 55, 0.25);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      color: #6e5030;
+    }
+
+    /* Thanh điều khiển lật trang bên dưới cuốn sách */
+    .book-controls {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    body.reading-mode .book-controls {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .book-ctrl-btn {
+      background: rgba(43, 19, 10, 0.9);
+      color: #fde68a;
+      border: 1px solid rgba(214, 176, 84, 0.55);
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .book-ctrl-btn:hover {
+      background: #4a2516;
+      border-color: #facc15;
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+    }
+
+    /* THANH THÔNG BÁO KHI ĐANG Ở CHẾ ĐỘ CHỈNH SỬA */
+    .edit-banner {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 95;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid #facc15;
+      color: #fef08a;
+      padding: 8px 18px;
+      border-radius: 25px;
+      font-size: 12.5px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+    }
+    body.edit-mode .edit-banner {
+      display: flex;
+    }
+
+    /* MODAL XIN QUYỀN TRUY CẬP (ALT + Q) */
+    .modal-box {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 110;
+      width: 420px;
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid #64748b;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
+      display: none;
+    }
+    .modal-box.active { display: block; }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #334155;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 4px;
+      margin-bottom: 10px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      color: white;
+      font-size: 13px;
+    }
+
+    /* BẢNG CHỈNH SỬA THÔNG SỐ */
+    .control-panel {
+      position: fixed;
+      top: 60px;
+      right: 20px;
+      z-index: 100;
+      width: 400px;
+      max-height: 86vh;
+      overflow-y: auto;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid #94a3b8;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
+      display: none;
+    }
+    .control-panel.active { display: block; }
+
+    .control-group {
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #334155;
+    }
+
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      margin-bottom: 5px;
+      color: #cbd5e1;
+    }
+
+    .control-group input[type="range"],
+    .control-group select {
+      width: 100%;
+      cursor: pointer;
+      margin-bottom: 4px;
+    }
+
+    .control-group select {
+      padding: 6px;
+      background: #1e293b;
+      color: #facc15;
+      font-weight: bold;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .file-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      margin-bottom: 5px;
+      background: #1e293b;
+      padding: 5px 8px;
+      border-radius: 6px;
+    }
+    .file-row input[type="file"] {
+      width: 195px;
+      font-size: 11px;
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 9px;
+      margin-top: 6px;
+      background: linear-gradient(135deg, #facc15, #eab308);
+      color: #0f172a;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Bộ lọc SVG tạo hiệu ứng sóng cờ động tự nhiên -->
+  <svg width="0" height="0" style="position:absolute">
+    <filter id="waving-filter">
+      <feTurbulence id="turbulence" type="fractalNoise" baseFrequency="0.015 0.03" numOctaves="2" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="12" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </svg>
+
+  <!-- Nền lịch sử số 5 -->
+  <div class="bg-layer" id="bgLayer"></div>
+  <div class="bg-overlay"></div>
+
+  <!-- Lớp tối xung quanh kèm hiệu ứng Đèn Pin (Spotlight) rọi vào sách khi nhấn ĐỌC -->
+  <div class="flashlight-overlay" id="flashlightOverlay"></div>
+
+  <!-- Thanh công cụ khi bật chế độ chỉnh sửa -->
+  <div class="edit-banner">
+    <span>🛠️ <strong>Đã cấp quyền chỉnh sửa:</strong> Kéo chuột di chuyển • Lăn chuột phóng to/nhỏ • Nhấn đúp vào văn bản sách để sửa nội dung</span>
+    <button onclick="document.getElementById('panel').classList.toggle('active')" style="background:#38bdf8;border:none;padding:4px 10px;border-radius:12px;font-weight:bold;cursor:pointer;">Bảng thông số</button>
+    <button onclick="lockEditMode()" style="background:#f87171;color:white;border:none;padding:4px 10px;border-radius:12px;font-weight:bold;cursor:pointer;">Khóa lại</button>
+  </div>
+
+  <!-- 1. Góc trên trái: Huy hiệu Đoàn -->
+  <div class="corner-wrapper wrap-tl" id="wrap-tl" data-key="tl">
+    <img src="image_c4447e.png" alt="Huy hiệu Đoàn" class="corner-img" id="item-tl" onerror="handleImgError(this)">
+    <div class="resize-handle" data-key="tl"></div>
+  </div>
+
+  <!-- 2. Góc trên phải: Cờ Việt Nam -->
+  <div class="corner-wrapper wrap-tr" id="wrap-tr" data-key="tr" title="Nhấn để xem hiệu ứng vẫy cờ">
+    <div class="flag-clip-box">
+      <img src="image_c44ec3.png" alt="Cờ Tĩnh" class="corner-img tr-static" id="item-tr" onerror="handleImgError(this)">
+      <img src="co_dong.gif" alt="Cờ Động" class="tr-media active-media" id="item-tr-gif" onerror="fallbackToFolderFlag(this)">
+      <video id="item-tr-video" class="tr-media" autoplay loop muted playsinline></video>
+    </div>
+    <div class="resize-handle" data-key="tr"></div>
+  </div>
+
+  <!-- 3. Góc dưới trái: Trống đồng -->
+  <div class="corner-wrapper wrap-bl" id="wrap-bl" data-key="bl" title="Nhấn để xem hiệu ứng trống đồng">
+    <img src="image_c29128.png" alt="Trống đồng" class="corner-img" id="item-bl" onerror="handleImgError(this)">
+    <div class="resize-handle" data-key="bl"></div>
+  </div>
+
+  <!-- 4. Góc dưới phải: Tượng chiến sĩ -->
+  <div class="corner-wrapper wrap-br" id="wrap-br" data-key="br">
+    <img src="image_c447c1.png" alt="Tượng chiến sĩ" class="corner-img" id="item-br" onerror="handleImgError(this)">
+    <div class="resize-handle" data-key="br"></div>
+  </div>
+
+  <!-- =====================================================================
+       CUỐN SÁCH NÂU ĐẤT CHÍNH GIỮA MÀN HÌNH (BÌA NÂU ĐẤT - GIẤY VÀNG NGẢ)
+       ===================================================================== -->
+  <div class="main-stage">
+    <div class="book-wrapper" id="bookWrapper">
+      <div id="flipbook">
+
+        <!-- TRANG BÌA TRƯỚC (MÀU NÂU ĐẤT + CHỮ DẤU CHÂN NGƯỜI LÍNH + NÚT ĐỌC CHÌM) -->
+        <div class="page page-cover" data-density="hard">
+          <div class="cover-spine"></div>
+          <div class="cover-gold-frame">
+            <div style="font-size:0.78rem; letter-spacing:3px; color:#d6b054; text-transform:uppercase;">
+              Tư Liệu & Ký Ức Lịch Sử
+            </div>
+
+            <!-- Chữ DẤU CHÂN NGƯỜI LÍNH: Đưa chuột vào tự động phát sáng -->
+            <h1 class="book-main-title">
+              DẤU CHÂN<br>NGƯỜI LÍNH
+            </h1>
+
+            <!-- Khung hình ảnh người lính trên bìa (bạn có thể thêm ảnh sau trong bảng Alt+Q) -->
+            <div class="cover-soldier-box" title="Bạn có thể thêm ảnh người lính từ Bảng Chỉnh Sửa (Alt + Q)">
+              <img id="coverSoldierImg" src="" alt="Hình ảnh người lính" style="display:none;">
+              <span id="soldierPlaceholder" class="soldier-placeholder-text">
+                [ Nơi hiển thị hình ảnh người lính ]
+              </span>
+            </div>
+
+            <!-- Góc dưới bìa: Chữ ĐỌC viết kiểu chìm chìm, ấn vào sẽ mở sách & bật đèn pin -->
+            <div class="cover-footer">
+              <button class="sunken-read-btn" id="btnOpenBook" onclick="openBookAndSpotlight(event)">
+                ĐỌC
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRANG 1 (GIẤY MÀU VÀNG NGẢ CỔ ĐIỂN) -->
+        <div class="page page-inner">
+          <div>
+            <div class="page-header">
+              <span>Dấu Chân Người Lính</span>
+              <span>Trang 1</span>
+            </div>
+            <h2 class="page-title" contenteditable="false">Chương I: Buổi Đầu Ra Quân</h2>
+            <div class="page-photo-frame">
+              <img id="page1Img" src="image_c440bd.jpg" alt="Ảnh tư liệu trang 1" onerror="this.style.display='none'">
+            </div>
+            <div class="page-text" contenteditable="false">
+              Từ giữa rừng Trần Hưng Đạo năm 1944, 34 chiến sĩ đầu tiên của Đội Việt Nam Tuyên truyền Giải phóng quân đã tuyên thệ dưới lá cờ đỏ sao vàng. Những bước chân người lính bắt đầu hành trình dài xuyên qua núi rừng Việt Bắc, mở đầu cho trang sử hào hùng của dân tộc.
+            </div>
+          </div>
+          <div class="page-footer">
+            <span>Tư liệu Lịch sử</span>
+            <span>✦</span>
+          </div>
+        </div>
+
+        <!-- TRANG 2 (GIẤY MÀU VÀNG NGẢ CỔ ĐIỂN) -->
+        <div class="page page-inner">
+          <div>
+            <div class="page-header">
+              <span>Ký Ức Hành Quân</span>
+              <span>Trang 2</span>
+            </div>
+            <h2 class="page-title" contenteditable="false">Chương II: Vượt Dãy Trường Sơn</h2>
+            <div class="page-photo-frame">
+              <img id="page2Img" src="image_c447c1.png" alt="Ảnh tư liệu trang 2" onerror="this.style.display='none'">
+            </div>
+            <div class="page-text" contenteditable="false">
+              Trên những cung đường Trường Sơn huyền thoại, dấu chân người lính in đậm qua từng triền dốc, từng cánh rừng già. Chiếc ba lô con cóc, chiếc mũ tai bèo và ý chí kiên cường đã đưa các anh vượt qua mưa bom bão đạn, hướng tới ngày toàn thắng.
+            </div>
+          </div>
+          <div class="page-footer">
+            <span>✦</span>
+            <span>Nhấn mép trang để lật tiếp ➔</span>
+          </div>
+        </div>
+
+        <!-- TRANG 3 (GIẤY MÀU VÀNG NGẢ CỔ ĐIỂN) -->
+        <div class="page page-inner">
+          <div>
+            <div class="page-header">
+              <span>Dấu Chân Người Lính</span>
+              <span>Trang 3</span>
+            </div>
+            <h2 class="page-title" contenteditable="false">Chương III: Khúc Khải Hoàn</h2>
+            <div class="page-photo-frame">
+              <img id="page3Img" src="image_c44ec3.png" alt="Ảnh tư liệu trang 3" onerror="this.style.display='none'">
+            </div>
+            <div class="page-text" contenteditable="false">
+              Bạn có thể tự do thay đổi hình ảnh và chỉnh sửa nội dung văn bản của từng trang sách này khi mở quyền chỉnh sửa (Alt + Q). Mọi thông tin và hình ảnh sẽ được lưu tự động.
+            </div>
+          </div>
+          <div class="page-footer">
+            <span>Trang 3</span>
+            <span>✦</span>
+          </div>
+        </div>
+
+        <!-- TRANG 4 (GIẤY MÀU VÀNG NGẢ CỔ ĐIỂN) -->
+        <div class="page page-inner">
+          <div>
+            <div class="page-header">
+              <span>Lời Kết</span>
+              <span>Trang 4</span>
+            </div>
+            <h2 class="page-title" contenteditable="false">Tri Ân Thế Hệ Đi Trước</h2>
+            <div class="page-text" contenteditable="false">
+              Những trang viết và hình ảnh tư liệu trong cuốn sổ tay này là lời tri ân sâu sắc gửi đến các thế hệ chiến sĩ đã hy sinh tuổi xuân vì độc lập, tự do của Tổ quốc.
+            </div>
+          </div>
+          <div class="page-footer">
+            <span>✦</span>
+            <span>Hết</span>
+          </div>
+        </div>
+
+        <!-- BÌA SAU (MÀU NÂU ĐẤT) -->
+        <div class="page page-cover" data-density="hard">
+          <div class="cover-gold-frame" style="margin-left:0; width:100%; justify-content:center;">
+            <p style="font-family:'Oswald',sans-serif; letter-spacing:3px; color:#d6b054; font-size:1.1rem;">
+              KHÔNG GIAN SÁCH LỊCH SỬ VIỆT NAM
+            </p>
+            <button class="sunken-read-btn" style="margin-top:24px;" onclick="closeBookToCover(event)">
+              ĐÓNG SÁCH
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Thanh nút lật trang & đóng sách khi đang ở chế độ đọc -->
+    <div class="book-controls">
+      <button class="book-ctrl-btn" onclick="pageFlip.flipPrev()">◀ Trang trước</button>
+      <button class="book-ctrl-btn" onclick="closeBookToCover(event)">📕 Gấp sách & Bật sáng nền</button>
+      <button class="book-ctrl-btn" onclick="pageFlip.flipNext()">Trang sau ▶</button>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL XIN QUYỀN TRUY CẬP (PHÍM TẮT: ALT + Q)
+       ===================================================================== -->
+  <div class="modal-box" id="emailModal">
+    <div class="modal-header">
+      <strong>🛡️ Yêu cầu quyền truy cập chỉnh sửa (Alt + Q)</strong>
+      <button onclick="document.getElementById('emailModal').classList.remove('active')" style="background:none;border:none;color:white;cursor:pointer;font-size:16px;">✖</button>
+    </div>
+
+    <div class="control-group" style="border-bottom:none; margin-bottom:0;">
+      <p style="font-size:12.5px; color:#cbd5e1; margin-bottom:10px;">
+        Gửi yêu cầu tới chủ sở hữu trang web để được cấp quyền hoặc nhập mã PIN quản trị viên trực tiếp.
+      </p>
+      <input type="text" id="reqName" class="input-field" placeholder="Họ tên của bạn...">
+      <input type="email" id="reqEmail" class="input-field" placeholder="Email của bạn...">
+      <input type="text" id="reqReason" class="input-field" placeholder="Lý do xin chỉnh sửa...">
+
+      <div style="display:flex; gap:8px; margin-top:4px;">
+        <button class="btn-action btn-secondary" style="flex:1;" onclick="sendAccessRequest()">
+          📨 Gửi yêu cầu
+        </button>
+        <button class="btn-action" style="flex:1; margin-top:0;" onclick="quickUnlockPin()">
+          🔑 Nhập mã PIN
+        </button>
+      </div>
+      <p id="mailStatusMsg" style="font-size:12px; color:#94a3b8; margin-top:8px;"></p>
+    </div>
+  </div>
+
+  <!-- BẢNG CHỈNH SỬA THÔNG SỐ & THÊM ẢNH SÁCH -->
+  <div class="control-panel" id="panel">
+    <div class="modal-header">
+      <strong>⚙️ Bảng Chỉnh Sửa Giao Diện & Sách</strong>
+      <button onclick="document.getElementById('panel').classList.remove('active')" style="background:none;border:none;color:white;cursor:pointer;font-size:16px;">✖</button>
+    </div>
+
+    <!-- MỤC THÊM ẢNH NGƯỜI LÍNH TRÊN BÌA SÁCH & CÁC TRANG -->
+    <div class="control-group">
+      <label><strong style="color:#facc15;">📖 Thêm ảnh cho Cuốn Sách:</strong></label>
+      <div class="file-row">
+        <span style="color:#fde68a;">Ảnh Người Lính (Bìa sách):</span>
+        <input type="file" accept="image/*" onchange="uploadBookImage(event, 'coverSoldierImg')">
+      </div>
+      <div class="file-row">
+        <span>Ảnh Trang 1:</span>
+        <input type="file" accept="image/*" onchange="uploadBookImage(event, 'page1Img')">
+      </div>
+      <div class="file-row">
+        <span>Ảnh Trang 2:</span>
+        <input type="file" accept="image/*" onchange="uploadBookImage(event, 'page2Img')">
+      </div>
+      <div class="file-row">
+        <span>Ảnh Trang 3:</span>
+        <input type="file" accept="image/*" onchange="uploadBookImage(event, 'page3Img')">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label><strong>📐 Chọn vật thể 4 góc:</strong></label>
+      <select id="targetSelect" onchange="loadTargetValues()">
+        <option value="tr">2. Cờ Việt Nam (Có màu + Bo góc)</option>
+        <option value="bl">3. Trống Đồng</option>
+        <option value="tl">1. Huy hiệu Đoàn (Có màu)</option>
+        <option value="br">4. Tượng Chiến Sĩ (Có màu)</option>
+      </select>
+
+      <label>Kích thước (Size - Tới 1500px): <span id="val-size">170px</span></label>
+      <input type="range" id="inp-size" min="50" max="1500" value="170" oninput="updateCorner()">
+
+      <label>Độ bo góc (Border Radius): <span id="val-radius">16px</span></label>
+      <input type="range" id="inp-radius" min="0" max="120" value="16" oninput="updateCorner()">
+
+      <label>Độ phóng to khi nhấn (Zoom): <span id="val-zoom">1.45x</span></label>
+      <input type="range" id="inp-zoom" min="1.0" max="3.5" step="0.05" value="1.45" oninput="updateCorner()">
+    </div>
+
+    <div class="control-group">
+      <label>Độ rõ (Opacity): <span id="val-opacity">0.85</span></label>
+      <input type="range" id="inp-opacity" min="0.05" max="1" step="0.05" value="0.85" oninput="updateCorner()">
+
+      <label><strong>Độ tối hình nền số 5:</strong> <span id="val-bg">0.80</span></label>
+      <input type="range" id="inp-bg" min="0.3" max="0.96" step="0.02" value="0.80" oninput="updateBg()">
+    </div>
+
+    <div class="control-group">
+      <label><strong style="color:#facc15;">📁 Nạp ảnh 4 góc & Cờ động:</strong></label>
+      <div class="file-row"><span>Nền số 5:</span><input type="file" accept="image/*" onchange="uploadImage(event, 'bg')"></div>
+      <div class="file-row"><span>1. Huy hiệu Đoàn:</span><input type="file" accept="image/*" onchange="uploadImage(event, 'item-tl')"></div>
+      <div class="file-row"><span>2. Cờ tĩnh:</span><input type="file" accept="image/*" onchange="uploadImage(event, 'item-tr')"></div>
+      <div class="file-row"><span style="color:#38bdf8;">   ↳ Cờ động (GIF/Video):</span><input type="file" accept="image/gif,video/mp4,video/webm,image/*" onchange="uploadFlagDynamic(event)"></div>
+      <div class="file-row"><span>3. Trống Đồng:</span><input type="file" accept="image/*" onchange="uploadImage(event, 'item-bl')"></div>
+      <div class="file-row"><span>4. Tượng Chiến Sĩ:</span><input type="file" accept="image/*" onchange="uploadImage(event, 'item-br')"></div>
+    </div>
+
+    <button class="btn-action" onclick="exportFullHTML()">
+      💾 Tải file index.html mới nhất
+    </button>
+  </div>
+
+  <!-- Thư viện lật trang sách 3D StPageFlip -->
+  <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+  <script>
+    const ADMIN_EMAIL = "email_cua_ban@gmail.com";
+    const ADMIN_PIN   = "1234";
+
+    let isEditMode = localStorage.getItem('ls_edit_granted') === 'true';
+    let flagWaveInterval = null;
+    let wavePhase = 0;
+    let pageFlip = null;
+
+    // =========================================================================
+    // 1. KHỞI TẠO CUỐN SÁCH 3D & HIỆU ỨNG ĐÈN PIN RỌI SÁCH
+    // =========================================================================
+    function initFlipBook() {
+      const bookEl = document.getElementById('flipbook');
+      pageFlip = new St.PageFlip(bookEl, {
+        width: 460,             // Chiều rộng 1 trang (Khi mở đôi rộng 920px rất thoải mái chèn ảnh)
+        height: 600,            // Chiều cao cuốn sách
+        size: "fixed",
+        maxShadowOpacity: 0.7,  // Độ bóng gáy sách chân thực
+        showCover: true,        // Trang đầu là bìa cứng nâu đất
+        usePortrait: false,
+        mobileScrollSupport: false
+      });
+
+      pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+
+      // Tự động bật/tắt hiệu ứng đèn pin tối xung quanh khi mở hoặc đóng bìa sách
+      pageFlip.on('flip', (e) => {
+        if (e.data > 0) {
+          document.body.classList.add('reading-mode');
+        } else {
+          document.body.classList.remove('reading-mode');
+        }
+      });
+    }
+
+    // Khi ấn vào chữ "ĐỌC" chìm ở góc dưới bìa: Mở sách ra & Bật hiệu ứng đèn pin tối xung quanh
+    function openBookAndSpotlight(event) {
+      if (event) event.stopPropagation();
+      document.body.classList.add('reading-mode');
+      if (pageFlip) {
+        pageFlip.flipNext();
+      }
+    }
+
+    // Đóng sách về lại trang bìa & trả lại ánh sáng xung quanh
+    function closeBookToCover(event) {
+      if (event) event.stopPropagation();
+      document.body.classList.remove('reading-mode');
+      if (pageFlip) {
+        pageFlip.flip(0);
+      }
+    }
+
+    // Di chuyển tâm đèn pin nhẹ nhàng theo trỏ chuột khi đang đọc sách
+    window.addEventListener('mousemove', (e) => {
+      if (document.body.classList.contains('reading-mode')) {
+        const xPercent = (e.clientX / window.innerWidth) * 100;
+        const yPercent = (e.clientY / window.innerHeight) * 100;
+        // Giữ đèn pin tập trung quanh khu vực cuốn sách ở giữa nhưng vẫn phản hồi theo chuột
+        const clampedX = 50 + (xPercent - 50) * 0.35;
+        const clampedY = 50 + (yPercent - 50) * 0.35;
+        document.documentElement.style.setProperty('--spot-x', clampedX + '%');
+        document.documentElement.style.setProperty('--spot-y', clampedY + '%');
+      }
+    });
+
+    // Nạp ảnh Người lính trên bìa hoặc ảnh các trang sách
+    function uploadBookImage(event, imgId) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Url = e.target.result;
+        const imgEl = document.getElementById(imgId);
+        if (imgEl) {
+          imgEl.src = base64Url;
+          imgEl.style.display = 'block';
+          if (imgId === 'coverSoldierImg') {
+            const ph = document.getElementById('soldierPlaceholder');
+            if (ph) ph.style.display = 'none';
+          }
+          try { localStorage.setItem('saved_book_' + imgId, base64Url); } catch (err) {}
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // =========================================================================
+    // 2. QUẢN TRỊ QUYỀN TRUY CẬP & CHỈNH SỬA (ALT + Q)
+    // =========================================================================
+    function fallbackToFolderFlag(gifEl) {
+      const savedGif = localStorage.getItem('saved_item-tr-gif');
+      if (savedGif) {
+        gifEl.onerror = null;
+        gifEl.src = savedGif;
+        gifEl.classList.remove('auto-wave-fallback');
+        return;
+      }
+      const savedStatic = localStorage.getItem('saved_item-tr');
+      gifEl.onerror = null;
+      gifEl.src = savedStatic || 'image_c44ec3.png';
+      gifEl.classList.add('auto-wave-fallback');
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.altKey && (e.key === 'q' || e.key === 'Q')) || e.key === 'F2') {
+        e.preventDefault();
+        document.getElementById('emailModal').classList.toggle('active');
+      }
+    });
+
+    function quickUnlockPin() {
+      const pin = prompt("Nhập mã PIN quản trị viên:");
+      if (pin === ADMIN_PIN) {
+        grantEditPermission();
+        alert("Đã cấp quyền chỉnh sửa! Bạn có thể kéo thả 4 góc và sửa trực tiếp chữ trong sách.");
+        document.getElementById('emailModal').classList.remove('active');
+      } else if (pin !== null) {
+        alert("Sai mã PIN!");
+      }
+    }
+
+    function grantEditPermission() {
+      isEditMode = true;
+      localStorage.setItem('ls_edit_granted', 'true');
+      document.body.classList.add('edit-mode');
+      document.getElementById('panel').classList.add('active');
+      document.querySelectorAll('.page-title, .page-text').forEach(el => {
+        el.setAttribute('contenteditable', 'true');
+      });
+      loadTargetValues();
+    }
+
+    function lockEditMode() {
+      isEditMode = false;
+      localStorage.setItem('ls_edit_granted', 'false');
+      document.body.classList.remove('edit-mode');
+      document.getElementById('panel').classList.remove('active');
+      document.querySelectorAll('.page-title, .page-text').forEach(el => {
+        el.setAttribute('contenteditable', 'false');
+      });
+    }
+
+    async function sendAccessRequest() {
+      const name = document.getElementById('reqName').value.trim();
+      const email = document.getElementById('reqEmail').value.trim();
+      const reason = document.getElementById('reqReason').value.trim();
+      const statusMsg = document.getElementById('mailStatusMsg');
+
+      if (!name || !email) {
+        alert("Vui lòng nhập Họ tên và Email của bạn!");
+        return;
+      }
+
+      statusMsg.style.color = "#facc15";
+      statusMsg.innerText = "⏳ Đang gửi yêu cầu cấp quyền tới chủ sở hữu...";
+
+      try {
+        const response = await fetch(`https://formsubmit.co/ajax/${ADMIN_EMAIL}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({
+            _subject: `[Yêu cầu cấp quyền chỉnh sửa] từ ${name}`,
+            Ho_Ten: name,
+            Email_Nguoi_Xin: email,
+            Ly_Do: reason || "Xin quyền chỉnh sửa giao diện trang web",
+            Thoi_Gian: new Date().toLocaleString('vi-VN')
+          })
+        });
+        if (response.ok) {
+          statusMsg.style.color = "#4ade80";
+          statusMsg.innerText = "✅ Đã gửi yêu cầu thành công!";
+        } else {
+          throw new Error("Lỗi mạng");
+        }
+      } catch (err) {
+        statusMsg.style.color = "#f87171";
+        statusMsg.innerText = "⚠️ Vui lòng bấm nút '🔑 Nhập mã PIN' bên cạnh để mở quyền ngay.";
+      }
+    }
+
+    // =========================================================================
+    // 3. KÉO THẢ 4 GÓC & LƯU TỰ ĐỘNG
+    // =========================================================================
+    const root = document.documentElement;
+    const defaultState = {
+      tl: { size: 135, zoom: 1.35, x: 24, y: 24, opacity: 0.90, blur: 0,   bright: 100, contrast: 105, radius: 0 },
+      tr: { size: 170, zoom: 1.45, x: 24, y: 24, opacity: 0.85, blur: 0,   bright: 100, contrast: 110, radius: 16 },
+      bl: { size: 200, zoom: 1.45, x: 24, y: 24, opacity: 0.35, blur: 1.2, bright: 85,  contrast: 190, radius: 105 },
+      br: { size: 200, zoom: 1.35, x: 24, y: 16, opacity: 0.92, blur: 0,   bright: 100, contrast: 108, radius: 0 }
+    };
+
+    let state = JSON.parse(localStorage.getItem('ls_corner_state_v3') || 'null') || defaultState;
+
+    let activeDragKey = null;
+    let isResizingCorner = false;
+    let startMouseX = 0, startMouseY = 0, startObjX = 0, startObjY = 0, startObjSize = 0;
+    let isDraggingAction = false;
+
+    document.querySelectorAll('.corner-wrapper').forEach(wrapper => {
+      const key = wrapper.dataset.key;
+
+      wrapper.addEventListener('mousedown', (e) => {
+        if (!isEditMode) return;
+        e.stopPropagation();
+        e.preventDefault();
+
+        activeDragKey = key;
+        isDraggingAction = false;
+        startMouseX = e.clientX;
+        startMouseY = e.clientY;
+        startObjX = state[key].x;
+        startObjY = state[key].y;
+        startObjSize = state[key].size;
+        isResizingCorner = e.target.classList.contains('resize-handle');
+
+        document.getElementById('targetSelect').value = key;
+        loadTargetValues();
+      });
+
+      wrapper.addEventListener('wheel', (e) => {
+        if (!isEditMode) return;
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 18 : -18;
+        state[key].size = Math.min(1500, Math.max(50, state[key].size + delta));
+
+        document.getElementById('targetSelect').value = key;
+        applyAllStateToCSS();
+        loadTargetValues();
+        localStorage.setItem('ls_corner_state_v3', JSON.stringify(state));
+      }, { passive: false });
+
+      wrapper.addEventListener('click', (e) => {
+        if (isEditMode && isDraggingAction) {
+          isDraggingAction = false;
+          return;
+        }
+        if (key === 'tr') {
+          wrapper.classList.toggle('flag-active');
+          const turbulence = document.getElementById('turbulence');
+          if (wrapper.classList.contains('flag-active')) {
+            flagWaveInterval = setInterval(() => {
+              wavePhase += 0.05;
+              const freqX = 0.015 + Math.sin(wavePhase) * 0.005;
+              const freqY = 0.03 + Math.cos(wavePhase) * 0.006;
+              turbulence.setAttribute('baseFrequency', `${freqX.toFixed(4)} ${freqY.toFixed(4)}`);
+            }, 40);
+          } else {
+            clearInterval(flagWaveInterval);
+          }
+        }
+        if (key === 'bl') wrapper.classList.toggle('drum-active');
+      });
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isEditMode || !activeDragKey) return;
+
+      const dx = e.clientX - startMouseX;
+      const dy = e.clientY - startMouseY;
+
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) isDraggingAction = true;
+
+      if (isResizingCorner) {
+        const change = Math.max(dx, dy);
+        state[activeDragKey].size = Math.min(1500, Math.max(50, Math.round(startObjSize + change)));
+      } else {
+        if (activeDragKey === 'tl') { state.tl.x = startObjX + dx; state.tl.y = startObjY + dy; }
+        else if (activeDragKey === 'tr') { state.tr.x = startObjX - dx; state.tr.y = startObjY + dy; }
+        else if (activeDragKey === 'bl') { state.bl.x = startObjX + dx; state.bl.y = startObjY - dy; }
+        else if (activeDragKey === 'br') { state.br.x = startObjX - dx; state.br.y = startObjY - dy; }
+      }
+
+      applyAllStateToCSS();
+      loadTargetValues();
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (activeDragKey) {
+        localStorage.setItem('ls_corner_state_v3', JSON.stringify(state));
+        activeDragKey = null;
+        isResizingCorner = false;
+      }
+    });
+
+    function applyAllStateToCSS() {
+      for (const [k, s] of Object.entries(state)) {
+        const radiusVal = s.radius !== undefined ? s.radius : (k === 'tr' ? 16 : 0);
+        root.style.setProperty(`--${k}-size`, s.size + 'px');
+        root.style.setProperty(`--${k}-zoom`, s.zoom);
+        root.style.setProperty(`--${k}-offset-x`, s.x + 'px');
+        root.style.setProperty(`--${k}-offset-y`, s.y + 'px');
+        root.style.setProperty(`--${k}-opacity`, s.opacity);
+        root.style.setProperty(`--${k}-blur`, s.blur + 'px');
+        root.style.setProperty(`--${k}-brightness`, s.bright + '%');
+        root.style.setProperty(`--${k}-contrast`, s.contrast + '%');
+        root.style.setProperty(`--${k}-radius`, radiusVal + 'px');
+      }
+    }
+
+    function loadTargetValues() {
+      const t = document.getElementById('targetSelect').value;
+      const s = state[t];
+      if (s.radius === undefined) s.radius = (t === 'tr' ? 16 : 0);
+      document.getElementById('inp-size').value = s.size;
+      document.getElementById('inp-radius').value = s.radius;
+      document.getElementById('inp-zoom').value = s.zoom;
+      document.getElementById('inp-opacity').value = s.opacity;
+      updateLabels(s);
+
+      document.querySelectorAll('.corner-wrapper').forEach(el => {
+        el.classList.toggle('selected-target', isEditMode && el.dataset.key === t);
+      });
+    }
+
+    function updateCorner() {
+      const t = document.getElementById('targetSelect').value;
+      const s = state[t];
+      s.size    = Number(document.getElementById('inp-size').value);
+      s.radius  = Number(document.getElementById('inp-radius').value);
+      s.zoom    = Number(document.getElementById('inp-zoom').value);
+      s.opacity = Number(document.getElementById('inp-opacity').value);
+
+      applyAllStateToCSS();
+      updateLabels(s);
+      localStorage.setItem('ls_corner_state_v3', JSON.stringify(state));
+    }
+
+    function updateLabels(s) {
+      document.getElementById('val-size').innerText    = s.size + 'px';
+      document.getElementById('val-radius').innerText  = (s.radius || 0) + 'px';
+      document.getElementById('val-zoom').innerText    = s.zoom + 'x';
+      document.getElementById('val-opacity').innerText = s.opacity;
+    }
+
+    function updateBg() {
+      const v = document.getElementById('inp-bg').value;
+      root.style.setProperty('--bg-darkness', v);
+      document.getElementById('val-bg').innerText = v;
+      localStorage.setItem('ls_bg_darkness', v);
+    }
+
+    function handleImgError(imgEl) {
+      const savedData = localStorage.getItem('saved_' + imgEl.id);
+      if (savedData) imgEl.src = savedData;
+    }
+
+    function uploadImage(event, targetId) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Url = e.target.result;
+        if (targetId === 'bg') {
+          document.getElementById('bgLayer').style.backgroundImage = `url('${base64Url}')`;
+          localStorage.setItem('saved_bg', base64Url);
+        } else {
+          const img = document.getElementById(targetId);
+          img.src = base64Url;
+          img.style.visibility = 'visible';
+          localStorage.setItem('saved_' + targetId, base64Url);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function uploadFlagDynamic(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const gifEl = document.getElementById('item-tr-gif');
+      const vidEl = document.getElementById('item-tr-video');
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        if (file.type.startsWith('video/')) {
+          vidEl.src = dataUrl;
+          vidEl.classList.add('active-media');
+          gifEl.classList.remove('active-media');
+          vidEl.play();
+          try { localStorage.setItem('saved_flag_video', dataUrl); } catch (err) {}
+          localStorage.removeItem('saved_item-tr-gif');
+        } else {
+          gifEl.src = dataUrl;
+          gifEl.style.visibility = 'visible';
+          gifEl.classList.remove('auto-wave-fallback');
+          gifEl.classList.add('active-media');
+          vidEl.classList.remove('active-media');
+          try { localStorage.setItem('saved_item-tr-gif', dataUrl); } catch (err) {}
+          localStorage.removeItem('saved_flag_video');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initFlipBook();
+      applyAllStateToCSS();
+      loadTargetValues();
+
+      if (isEditMode) {
+        grantEditPermission();
+      }
+
+      const savedBgDark = localStorage.getItem('ls_bg_darkness');
+      if (savedBgDark) {
+        root.style.setProperty('--bg-darkness', savedBgDark);
+        document.getElementById('inp-bg').value = savedBgDark;
+        document.getElementById('val-bg').innerText = savedBgDark;
+      }
+
+      const savedBg = localStorage.getItem('saved_bg');
+      if (savedBg) document.getElementById('bgLayer').style.backgroundImage = `url('${savedBg}')`;
+
+      ['item-tl', 'item-tr', 'item-bl', 'item-br'].forEach(id => {
+        const savedImg = localStorage.getItem('saved_' + id);
+        if (savedImg) {
+          const img = document.getElementById(id);
+          if (img) img.src = savedImg;
+        }
+      });
+
+      // Khôi phục ảnh người lính trên bìa và các trang sách đã lưu
+      ['coverSoldierImg', 'page1Img', 'page2Img', 'page3Img'].forEach(id => {
+        const savedBookImg = localStorage.getItem('saved_book_' + id);
+        if (savedBookImg) {
+          const imgEl = document.getElementById(id);
+          if (imgEl) {
+            imgEl.src = savedBookImg;
+            imgEl.style.display = 'block';
+            if (id === 'coverSoldierImg') {
+              const ph = document.getElementById('soldierPlaceholder');
+              if (ph) ph.style.display = 'none';
+            }
+          }
+        }
+      });
+
+      const savedGif = localStorage.getItem('saved_item-tr-gif');
+      if (savedGif) {
+        const gifEl = document.getElementById('item-tr-gif');
+        gifEl.src = savedGif;
+        gifEl.classList.remove('auto-wave-fallback');
+      }
+
+      const savedVid = localStorage.getItem('saved_flag_video');
+      if (savedVid) {
+        const vidEl = document.getElementById('item-tr-video');
+        const gifEl = document.getElementById('item-tr-gif');
+        vidEl.src = savedVid;
+        vidEl.classList.add('active-media');
+        gifEl.classList.remove('active-media');
+      }
+    });
+
+    function exportFullHTML() {
+      lockEditMode();
+      document.getElementById('emailModal').classList.remove('active');
+      const fullHtml = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "index.html";
+      a.click();
+    }
+  </script>
+</body>
+</html>
