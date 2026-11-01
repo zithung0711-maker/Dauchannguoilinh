@@ -13,12 +13,12 @@
       --bg-contrast: 120%;
       --bg-brightness: 85%;
 
-      /* --- ĐỘ PHỦ BỤI CŨ KỸ (VINTAGE DUST & GRAIN) --- */
-      --dust-opacity: 0.32;
+      /* --- ĐỘ PHỦ BỤI CŨ KỸ (VINTAGE DUST) --- */
+      --dust-opacity: 0.28;
 
       /* --- ĐỘ SÁNG, CHẤT LIỆU & KHUNG ẢNH BÌA SÁCH --- */
-      --book-closed-bright: 0.68;
-      --book-open-zoom: 1.15;
+      --book-closed-bright: 0.72;
+      --book-open-zoom: 1.12;
       --leather-texture: url('bia_da.jpg');
       --cover-img-width: 82%;
       --cover-img-height: 235px;
@@ -26,31 +26,27 @@
 
       /* --- 1. GÓC TRÊN TRÁI: HUY HIỆU ĐOÀN --- */
       --tl-size: 140px; --tl-offset-x: 24px; --tl-offset-y: 24px;
-      --tl-brightness: 100%; --tl-contrast: 105%; --tl-opacity: 0.90;
+      --tl-brightness: 90%; --tl-contrast: 135%; --tl-opacity: 0.45;
       --tl-blur: 0px; --tl-zoom: 1.35; --tl-radius: 0px;
 
       /* --- 2. GÓC TRÊN PHẢI: CỜ VIỆT NAM --- */
       --tr-size: 175px; --tr-offset-x: 24px; --tr-offset-y: 24px;
-      --tr-brightness: 100%; --tr-contrast: 110%; --tr-opacity: 0.88;
+      --tr-brightness: 85%; --tr-contrast: 145%; --tr-opacity: 0.42;
       --tr-blur: 0px; --tr-zoom: 1.45; --tr-radius: 16px;
 
       /* --- 3. GÓC DƯỚI TRÁI: TRỐNG ĐỒNG --- */
       --bl-size: 205px; --bl-offset-x: 24px; --bl-offset-y: 24px;
-      --bl-brightness: 85%; --bl-contrast: 190%; --bl-opacity: 0.40;
-      --bl-blur: 1px; --bl-zoom: 1.45; --bl-radius: 50%;
+      --bl-brightness: 85%; --bl-contrast: 185%; --bl-opacity: 0.40;
+      --bl-blur: 0px; --bl-zoom: 1.45; --bl-radius: 50%;
 
       /* --- 4. GÓC DƯỚI PHẢI: TƯỢNG CHIẾN SĨ --- */
       --br-size: 205px; --br-offset-x: 24px; --br-offset-y: 16px;
-      --br-brightness: 100%; --br-contrast: 108%; --br-opacity: 0.92;
+      --br-brightness: 90%; --br-contrast: 135%; --br-opacity: 0.50;
       --br-blur: 0px; --br-zoom: 1.35; --br-radius: 0px;
 
       /* Kích thước 1 trang sách trên máy tính */
       --book-page-width: 420px;
       --book-page-height: 570px;
-
-      /* Tọa độ tâm đèn pin */
-      --spot-x: 50vw;
-      --spot-y: 50vh;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -66,7 +62,7 @@
       touch-action: none;
     }
 
-    /* HÌNH NỀN SỐ 5 */
+    /* HÌNH NỀN SỐ 5 (Tối ưu GPU) */
     .bg-layer {
       position: fixed;
       inset: 0;
@@ -75,13 +71,8 @@
       background-position: center;
       background-repeat: no-repeat;
       filter: grayscale(100%) contrast(var(--bg-contrast)) brightness(var(--bg-brightness));
-      transition: filter 1s cubic-bezier(0.22, 1, 0.36, 1), transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+      transform: translateZ(0);
       z-index: 1;
-    }
-
-    body.reading-mode .bg-layer {
-      filter: grayscale(100%) contrast(120%) brightness(20%) blur(7px);
-      transform: scale(1.03);
     }
 
     .bg-overlay {
@@ -94,39 +85,31 @@
         rgba(0, 0, 0, 0.97) 100%
       );
       z-index: 2;
+      pointer-events: none;
     }
 
-    /* LỚP PHỦ BỤI MỜ & VẾT CŨ KỸ THỜI GIAN */
+    /* LỚP PHỦ BỤI MỜ NHẸ NHÀNG (Không dùng bộ lọc nặng gây lag) */
     .dust-vintage-layer {
       position: fixed;
       inset: 0;
       z-index: 43;
       pointer-events: none;
       opacity: var(--dust-opacity);
-      mix-blend-mode: screen;
       background-image:
-        radial-gradient(circle 1.5px at 12% 24%, rgba(255, 248, 230, 0.55) 0%, transparent 100%),
-        radial-gradient(circle 1px at 38% 72%, rgba(255, 248, 230, 0.45) 0%, transparent 100%),
-        radial-gradient(circle 2px at 67% 18%, rgba(245, 230, 200, 0.4) 0%, transparent 100%),
-        radial-gradient(circle 1.2px at 84% 62%, rgba(255, 248, 230, 0.5) 0%, transparent 100%),
-        radial-gradient(circle 1.5px at 28% 48%, rgba(240, 225, 195, 0.38) 0%, transparent 100%),
-        radial-gradient(circle 1px at 54% 85%, rgba(255, 248, 230, 0.45) 0%, transparent 100%),
-        radial-gradient(ellipse 140px 90px at 22% 18%, rgba(160, 130, 85, 0.14) 0%, transparent 75%),
-        radial-gradient(ellipse 180px 110px at 78% 82%, rgba(150, 120, 75, 0.15) 0%, transparent 75%);
-      background-size: 260px 260px, 310px 310px, 290px 290px, 340px 340px, 220px 220px, 280px 280px, 100% 100%, 100% 100%;
+        radial-gradient(circle 1.5px at 15% 25%, rgba(255, 248, 230, 0.45) 0%, transparent 100%),
+        radial-gradient(circle 1.2px at 42% 70%, rgba(255, 248, 230, 0.38) 0%, transparent 100%),
+        radial-gradient(circle 1.8px at 68% 20%, rgba(245, 230, 200, 0.35) 0%, transparent 100%),
+        radial-gradient(circle 1.2px at 82% 65%, rgba(255, 248, 230, 0.42) 0%, transparent 100%),
+        radial-gradient(ellipse 180px 110px at 20% 18%, rgba(160, 130, 85, 0.10) 0%, transparent 75%),
+        radial-gradient(ellipse 200px 120px at 80% 82%, rgba(150, 120, 75, 0.10) 0%, transparent 75%);
+      background-size: 280px 280px, 320px 320px, 300px 300px, 350px 350px, 100% 100%, 100% 100%;
+      transform: translateZ(0);
     }
 
-    .dust-grain-canvas {
-      position: fixed;
-      inset: 0;
-      z-index: 44;
-      pointer-events: none;
-      opacity: calc(var(--dust-opacity) * 0.45);
-      filter: url(#dust-noise-filter);
-      mix-blend-mode: overlay;
-    }
-
-    /* 4 GÓC BIỂU TƯỢNG (TẤT CẢ ĐỀU SÁNG LÊN KHI DI CHUỘT VÀO) */
+    /* =====================================================================
+       4 GÓC BIỂU TƯỢNG:
+       MẶC ĐỊNH MẤT MÀU (GRAYSCALE 100%), CHỈ KHI ĐƯA CHUỘT LẠI GẦN MỚI SÁNG MÀU LÊN
+       ===================================================================== */
     .corner-wrapper {
       position: fixed;
       z-index: 30;
@@ -136,23 +119,16 @@
       align-items: center;
       justify-content: center;
       transform-origin: center center;
-      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-                  filter 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-                  opacity 0.5s ease;
+      transform: translate3d(0, 0, 0);
+      transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.38s ease,
+                  box-shadow 0.38s ease;
     }
 
     body.reading-mode .corner-wrapper {
       z-index: 10 !important;
-      opacity: 0.15 !important;
-      filter: brightness(0.15) blur(6px) drop-shadow(0 0 0 transparent) !important;
-      transform: scale(1) translateY(0) !important;
+      opacity: 0.08 !important;
       pointer-events: none !important;
-    }
-
-    body.reading-mode .corner-wrapper .corner-img,
-    body.reading-mode .corner-wrapper .tr-static,
-    body.reading-mode .corner-wrapper .tr-media {
-      filter: brightness(0.15) blur(6px) drop-shadow(0 0 0 transparent) !important;
     }
 
     body.edit-mode .corner-wrapper {
@@ -187,27 +163,27 @@
       height: 100%;
       object-fit: contain;
       pointer-events: none;
-      transition: filter 0.45s ease, opacity 0.45s ease, transform 0.45s ease, border-radius 0.3s ease;
+      transform: translateZ(0);
+      transition: opacity 0.38s ease, transform 0.38s ease, filter 0.38s ease;
     }
 
-    /* 1. Góc trên trái: Huy hiệu Đoàn */
+    /* 1. Góc trên trái: Huy hiệu Đoàn (Mặc định mất màu -> Đưa chuột vào sáng màu rực rỡ) */
     .wrap-tl { top: var(--tl-offset-y); left: var(--tl-offset-x); width: var(--tl-size); }
     .wrap-tl .corner-img {
       opacity: var(--tl-opacity);
       border-radius: var(--tl-radius);
-      filter: brightness(var(--tl-brightness)) contrast(var(--tl-contrast)) blur(var(--tl-blur))
-              drop-shadow(0 4px 12px rgba(0, 0, 0, 0.65));
+      filter: grayscale(100%) brightness(var(--tl-brightness)) contrast(var(--tl-contrast));
     }
-    .wrap-tl:hover { transform: scale(1.10); }
+    .wrap-tl:hover {
+      transform: scale(1.10) translateZ(0);
+    }
     .wrap-tl:hover .corner-img {
       opacity: 1;
-      filter: brightness(118%) contrast(115%) saturate(125%) blur(0px)
-              drop-shadow(0 0 15px rgba(255, 255, 255, 0.9))
-              drop-shadow(0 0 28px rgba(239, 68, 68, 0.85))
-              drop-shadow(0 0 45px rgba(250, 204, 21, 0.7));
+      filter: grayscale(0%) saturate(125%) brightness(112%) contrast(110%)
+              drop-shadow(0 0 18px rgba(250, 204, 21, 0.85));
     }
 
-    /* 2. Góc trên phải: Cờ Việt Nam */
+    /* 2. Góc trên phải: Cờ Việt Nam (Mặc định mất màu -> Đưa chuột vào sáng màu đỏ sao vàng) */
     .wrap-tr {
       top: var(--tr-offset-y);
       right: var(--tr-offset-x);
@@ -225,6 +201,7 @@
       align-items: center;
       justify-content: center;
       pointer-events: none;
+      transform: translateZ(0);
     }
     .wrap-tr .tr-static {
       width: 100%;
@@ -232,18 +209,18 @@
       object-fit: cover;
       border-radius: var(--tr-radius);
       opacity: var(--tr-opacity);
-      filter: brightness(var(--tr-brightness)) contrast(var(--tr-contrast)) blur(var(--tr-blur))
-              drop-shadow(0 4px 12px rgba(0, 0, 0, 0.65));
-      transition: filter 0.45s ease, opacity 0.45s ease;
+      /* Mặc định mất màu */
+      filter: grayscale(100%) brightness(var(--tr-brightness)) contrast(var(--tr-contrast));
+      transition: opacity 0.38s ease, filter 0.38s ease;
     }
+    /* Đưa chuột lại gần lá cờ: Sáng màu đỏ sao vàng lên */
     .wrap-tr:not(.flag-active):hover {
-      transform: scale(1.08);
-      filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.9))
-              drop-shadow(0 0 32px rgba(250, 204, 21, 0.75));
+      transform: scale(1.08) translateZ(0);
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.8), 0 0 40px rgba(250, 204, 21, 0.5);
     }
     .wrap-tr:not(.flag-active):hover .tr-static {
       opacity: 1;
-      filter: brightness(120%) contrast(115%) saturate(130%) blur(0px);
+      filter: grayscale(0%) saturate(130%) brightness(112%) contrast(112%);
     }
 
     .wrap-tr .tr-media {
@@ -255,31 +232,29 @@
       border-radius: var(--tr-radius);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: opacity 0.4s ease;
     }
     .wrap-tr.flag-active {
       z-index: 32;
-      transform: scale(var(--tr-zoom)) translateY(-25px);
-      filter: drop-shadow(0 60px 25px rgba(0, 0, 0, 0.85))
-              drop-shadow(0 0 22px rgba(239, 68, 68, 0.75))
-              drop-shadow(0 0 35px rgba(250, 204, 21, 0.55));
+      transform: scale(var(--tr-zoom)) translate3d(0, -22px, 0);
+      box-shadow: 0 45px 30px rgba(0, 0, 0, 0.85), 0 0 25px rgba(239, 68, 68, 0.75);
     }
     .wrap-tr.flag-active .tr-static { opacity: 0; }
     .wrap-tr.flag-active .tr-media.active-media { opacity: 1; }
     .wrap-tr.flag-active .tr-media.auto-wave-fallback {
-      filter: saturate(135%) contrast(112%) brightness(106%) url(#waving-filter);
-      animation: smoothFlagWave 2.8s ease-in-out infinite;
+      filter: grayscale(0%) saturate(135%) contrast(112%) brightness(108%);
+      animation: smoothFlagWave 2.4s ease-in-out infinite;
     }
 
     @keyframes smoothFlagWave {
       0%   { transform: rotateY(0deg) skewY(0deg) scale(1.02); }
-      25%  { transform: rotateY(-10deg) skewY(2deg) scale(1.04); }
+      25%  { transform: rotateY(-12deg) skewY(2.5deg) scale(1.04); }
       50%  { transform: rotateY(4deg) skewY(-2deg) scale(1.02); }
-      75%  { transform: rotateY(10deg) skewY(1.5deg) scale(1.04); }
+      75%  { transform: rotateY(12deg) skewY(1.8deg) scale(1.04); }
       100% { transform: rotateY(0deg) skewY(0deg) scale(1.02); }
     }
 
-    /* 3. Góc dưới trái: Trống đồng */
+    /* 3. Góc dưới trái: Trống đồng (Mặc định mất màu -> Đưa chuột vào sáng ánh đồng vàng kim) */
     .wrap-bl {
       bottom: var(--bl-offset-y);
       left: var(--bl-offset-x);
@@ -289,69 +264,61 @@
     }
     .wrap-bl .corner-img {
       opacity: var(--bl-opacity);
-      filter: grayscale(100%) invert(1) brightness(var(--bl-brightness))
-              contrast(var(--bl-contrast)) blur(var(--bl-blur))
-              drop-shadow(1px 1px 0px rgba(226, 232, 240, 0.45))
-              drop-shadow(-2px -2px 3px rgba(0, 0, 0, 0.95));
+      filter: grayscale(100%) invert(1) brightness(var(--bl-brightness)) contrast(var(--bl-contrast));
     }
     .wrap-bl:not(.drum-active):hover {
-      transform: scale(1.08);
+      transform: scale(1.08) translateZ(0);
+      box-shadow: 0 0 28px rgba(250, 204, 21, 0.65);
     }
     .wrap-bl:not(.drum-active):hover .corner-img {
-      opacity: 0.92;
-      filter: grayscale(100%) invert(1) sepia(85%) saturate(450%) hue-rotate(5deg)
-              brightness(118%) contrast(145%) blur(0px)
-              drop-shadow(0 0 16px rgba(254, 240, 138, 0.85))
-              drop-shadow(0 0 32px rgba(234, 179, 8, 0.7));
+      opacity: 0.95;
+      filter: grayscale(100%) invert(1) sepia(90%) saturate(500%) hue-rotate(5deg) brightness(118%) contrast(145%);
     }
 
     .wrap-bl.drum-active {
       z-index: 32;
-      transform: scale(var(--bl-zoom)) translateY(-25px);
-      filter: drop-shadow(0 60px 25px rgba(0, 0, 0, 0.85))
-              drop-shadow(0 0 20px rgba(250, 204, 21, 0.45));
+      transform: scale(var(--bl-zoom)) translate3d(0, -22px, 0);
+      box-shadow: 0 50px 30px rgba(0, 0, 0, 0.85), 0 0 25px rgba(250, 204, 21, 0.6);
     }
     .wrap-bl.drum-active .corner-img {
       opacity: 1;
-      filter: grayscale(100%) invert(1) sepia(100%) saturate(750%) hue-rotate(6deg)
-              brightness(125%) contrast(155%) blur(0px)
-              drop-shadow(0 0 12px rgba(250, 204, 21, 0.95));
+      filter: grayscale(100%) invert(1) sepia(100%) saturate(700%) hue-rotate(6deg) brightness(122%) contrast(150%);
       animation: rotateDrumCircleReverse 10s linear infinite;
     }
 
     @keyframes rotateDrumCircleReverse {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(-360deg); }
+      from { transform: rotate(0deg) translateZ(0); }
+      to   { transform: rotate(-360deg) translateZ(0); }
     }
 
-    /* 4. Góc dưới phải: Tượng chiến sĩ */
+    /* 4. Góc dưới phải: Tượng chiến sĩ (Mặc định mất màu -> Đưa chuột vào sáng màu lên) */
     .wrap-br { bottom: var(--br-offset-y); right: var(--br-offset-x); width: var(--br-size); }
     .wrap-br .corner-img {
       opacity: var(--br-opacity);
       border-radius: var(--br-radius);
-      filter: brightness(var(--br-brightness)) contrast(var(--br-contrast)) blur(var(--br-blur))
-              drop-shadow(0 6px 16px rgba(0, 0, 0, 0.75));
+      filter: grayscale(100%) brightness(var(--br-brightness)) contrast(var(--br-contrast));
     }
-    .wrap-br:hover { transform: scale(1.10); }
+    .wrap-br:hover {
+      transform: scale(1.09) translateZ(0);
+    }
     .wrap-br:hover .corner-img {
       opacity: 1;
-      filter: brightness(118%) contrast(115%) saturate(120%) blur(0px)
-              drop-shadow(0 0 14px rgba(254, 240, 138, 0.95))
-              drop-shadow(0 0 30px rgba(250, 204, 21, 0.85))
-              drop-shadow(0 0 50px rgba(234, 179, 8, 0.65));
+      filter: grayscale(0%) saturate(120%) brightness(114%) contrast(112%)
+              drop-shadow(0 0 20px rgba(250, 204, 21, 0.8));
     }
 
-    /* ĐÈN PIN 3 MỨC SÁNG (TÔNG TRẮNG NGÀ TỰ NHIÊN) */
+    /* =====================================================================
+       ĐÈN PIN SIÊU MƯỢT CHẠY TRÊN GPU (KHÔNG LAG, TÔNG TRẮNG NGÀ TỰ NHIÊN)
+       ===================================================================== */
     .ambient-dark-backdrop {
       position: fixed;
       inset: 0;
       z-index: 25;
       pointer-events: none;
       opacity: 0;
-      background: rgba(2, 3, 6, 0.85);
-      backdrop-filter: blur(7px);
-      -webkit-backdrop-filter: blur(7px);
-      transition: opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+      background: rgba(2, 3, 6, 0.88);
+      transition: opacity 0.45s ease;
+      transform: translateZ(0);
     }
     body.reading-mode .ambient-dark-backdrop { opacity: 1; }
 
@@ -361,62 +328,54 @@
       z-index: 45;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+      overflow: hidden;
+      transition: opacity 0.45s ease;
     }
     body.reading-mode .flashlight-overlay-top { opacity: 1; }
 
-    .flashlight-three-levels {
+    /* Tấm màn đèn pin kích thước lớn di chuyển bằng translate3d trên GPU -> 0% CPU Repaint */
+    .flashlight-gpu-mover {
       position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(
-          circle 235px at var(--spot-x) var(--spot-y),
-          rgba(255, 253, 247, 0.09) 0%,
-          rgba(255, 250, 238, 0.05) 52%,
-          rgba(248, 242, 228, 0.02) 66%,
-          rgba(255, 249, 235, 0.13) 76%,
-          rgba(245, 235, 215, 0.06) 84%,
-          rgba(6, 8, 14, 0.19) 95%,
-          rgba(4, 6, 10, 0.24) 100%
-        );
-    }
-
-    .flashlight-bright-core {
-      position: absolute;
-      width: 440px;
-      height: 440px;
-      left: var(--spot-x);
-      top: var(--spot-y);
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
+      top: 0;
+      left: 0;
+      width: 4000px;
+      height: 4000px;
+      margin-left: -2000px;
+      margin-top: -2000px;
+      will-change: transform;
+      transform: translate3d(50vw, 50vh, 0);
       background: radial-gradient(
-        circle at center,
-        rgba(255, 253, 248, 0.11) 0%,
-        rgba(250, 245, 232, 0.05) 45%,
-        transparent 75%
+        circle 235px at 2000px 2000px,
+        rgba(255, 253, 248, 0.10) 0%,
+        rgba(255, 250, 240, 0.05) 52%,
+        rgba(248, 242, 228, 0.02) 66%,
+        rgba(255, 249, 235, 0.14) 76%,
+        rgba(245, 235, 215, 0.06) 84%,
+        rgba(6, 8, 14, 0.20) 95%,
+        rgba(4, 6, 10, 0.25) 100%
       );
-      mix-blend-mode: screen;
-      filter: blur(10px);
     }
 
-    .flashlight-lens-details {
+    .flashlight-gpu-ring {
       position: absolute;
+      top: 50%;
+      left: 50%;
       width: 440px;
       height: 440px;
-      left: var(--spot-x);
-      top: var(--spot-y);
-      transform: translate(-50%, -50%);
+      margin-left: -220px;
+      margin-top: -220px;
       border-radius: 49% 51% 50% 50% / 50% 50% 51% 49%;
-      border: 1px solid rgba(255, 248, 235, 0.12);
-      box-shadow: inset 0 0 28px rgba(255, 248, 235, 0.06);
+      border: 1px solid rgba(255, 248, 235, 0.14);
+      box-shadow: inset 0 0 28px rgba(255, 248, 235, 0.07);
       background:
         radial-gradient(ellipse 38px 26px at 32% 36%, rgba(35, 28, 20, 0.08) 0%, transparent 75%),
         radial-gradient(circle 22px at 68% 35%, rgba(35, 28, 20, 0.07) 0%, transparent 70%),
         radial-gradient(ellipse 45px 28px at 64% 68%, rgba(30, 24, 18, 0.08) 0%, transparent 75%);
-      filter: blur(2px);
     }
 
-    /* CUỐN SÁCH 3D */
+    /* =====================================================================
+       CUỐN SÁCH 3D (ĐÃ SỬA TRIỆT ĐỂ LỖI BÌA & TRANG 2 BỊ LẬT NGƯỢC TRÊN MÁY TÍNH)
+       ===================================================================== */
     .main-stage {
       position: fixed;
       inset: 0;
@@ -426,37 +385,49 @@
       align-items: center;
       justify-content: center;
       pointer-events: none;
-      perspective: 2600px;
+      perspective: 2400px;
     }
 
     body.reading-mode .main-stage {
       z-index: 40;
     }
 
+    /* Không dùng filter trực tiếp lên .book-3d để tránh lỗi trình duyệt làm hỏng backface-visibility 3D */
     .book-3d {
       position: relative;
       width: var(--book-page-width);
       height: var(--book-page-height);
       transform-style: preserve-3d;
-      transform: translateX(0%) scale(1) rotateX(5deg);
-      filter: brightness(var(--book-closed-bright)) contrast(105%)
-              drop-shadow(0 30px 40px rgba(0, 0, 0, 0.92));
-      transition: transform 1.25s cubic-bezier(0.22, 1, 0.36, 1),
-                  filter 0.95s cubic-bezier(0.22, 1, 0.36, 1);
-      will-change: transform, filter;
+      transform: translate3d(0, 0, 0) scale(1) rotateX(4deg);
+      box-shadow: 0 30px 45px rgba(0, 0, 0, 0.9);
+      transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+                  box-shadow 0.85s ease;
+      will-change: transform;
       pointer-events: auto;
     }
 
-    .book-3d:not(.book-open):hover {
-      filter: brightness(calc(var(--book-closed-bright) + 0.14)) contrast(108%)
-              drop-shadow(0 35px 48px rgba(0, 0, 0, 0.95));
-      transform: translateX(0%) scale(1.025) rotateX(3deg);
+    .book-3d:not(.book-open) .leather-cover {
+      filter: brightness(var(--book-closed-bright));
+      transition: filter 0.35s ease;
     }
 
+    .book-3d:not(.book-open):hover {
+      transform: translate3d(0, 0, 0) scale(1.02) rotateX(2deg);
+    }
+    .book-3d:not(.book-open):hover .leather-cover {
+      filter: brightness(calc(var(--book-closed-bright) + 0.14));
+    }
+
+    /* Trên Máy tính: Khi mở sách sẽ trượt sang phải 50% để 2 trang cân đối chính giữa */
     .book-3d.book-open {
-      transform: translateX(50%) scale(var(--book-open-zoom)) rotateX(2deg);
-      filter: brightness(1.02) contrast(103%)
-              drop-shadow(0 50px 70px rgba(0, 0, 0, 0.96));
+      transform: translate3d(50%, 0, 0) scale(var(--book-open-zoom)) rotateX(2deg);
+      box-shadow: -200px 45px 65px rgba(0, 0, 0, 0.92), 0 45px 65px rgba(0, 0, 0, 0.92);
+    }
+
+    /* Trên Điện thoại: Mở 1 trang duy nhất nằm chính giữa màn hình */
+    .book-3d.mobile-single-mode.book-open {
+      transform: translate3d(0, 0, 0) scale(1) rotateX(0deg);
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.95);
     }
 
     .book-sheet {
@@ -466,7 +437,7 @@
       height: 100%;
       transform-origin: left center;
       transform-style: preserve-3d;
-      transition: transform 1.25s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
       will-change: transform;
       cursor: pointer;
     }
@@ -475,6 +446,9 @@
       transform: rotateY(-180deg);
     }
 
+    /* KHẮC PHỤC TRIỆT ĐỂ LỖI LẬT NGƯỢC TRANG TRÊN MÁY TÍNH:
+       - Khi tờ giấy chưa lật (.book-sheet:not(.flipped)): Chỉ hiển thị mặt trước (.sheet-front), ẩn hoàn toàn mặt sau (.sheet-back).
+       - Khi tờ giấy đã lật sang trái (.book-sheet.flipped): Ẩn hoàn toàn mặt trước (.sheet-front), chỉ hiển thị mặt sau (.sheet-back) đã xoay 180deg đúng chiều! */
     .sheet-face {
       position: absolute;
       inset: 0;
@@ -485,8 +459,36 @@
       overflow: hidden;
     }
 
+    .sheet-front {
+      z-index: 2;
+      transform: rotateY(0deg) translateZ(1px);
+      visibility: visible;
+      transition: visibility 0s linear 0.25s;
+    }
+
     .sheet-back {
-      transform: rotateY(180deg);
+      z-index: 1;
+      transform: rotateY(180deg) translateZ(1px);
+      visibility: hidden;
+      transition: visibility 0s linear 0.25s;
+    }
+
+    .book-sheet.flipped .sheet-front {
+      visibility: hidden;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .book-sheet.flipped .sheet-back {
+      visibility: visible;
+      z-index: 2;
+    }
+
+    /* Khi ở chế độ 1 trang trên điện thoại: Tờ đã lật sang trái sẽ ẩn đi để chỉ hiện đúng 1 trang ở giữa */
+    .book-3d.mobile-single-mode .book-sheet.flipped {
+      transform: rotateY(-105deg) translateX(-15px);
+      opacity: 0;
+      pointer-events: none;
     }
 
     /* CHẤT LIỆU BÌA DA CŨ KỸ BÁM BỤI */
@@ -500,7 +502,6 @@
         radial-gradient(circle at 35% 25%, #6e3a24 0%, #421f11 55%, #1f0c05 100%);
       background-size: cover;
       background-position: center;
-      background-blend-mode: screen, screen, multiply, normal, normal;
       border-radius: 5px 14px 14px 5px;
       border: 2px solid #160803;
       box-shadow:
@@ -511,19 +512,6 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      position: relative;
-    }
-
-    .leather-cover::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        repeating-radial-gradient(circle at 20% 30%, rgba(0,0,0,0.14) 0px, transparent 2px, rgba(255,235,205,0.04) 3px),
-        radial-gradient(ellipse at top right, rgba(120, 100, 75, calc(var(--dust-opacity) * 0.35)) 0%, transparent 55%),
-        radial-gradient(ellipse at bottom left, rgba(110, 90, 65, calc(var(--dust-opacity) * 0.35)) 0%, transparent 55%);
-      pointer-events: none;
-      z-index: 1;
     }
 
     .cover-spine {
@@ -576,50 +564,34 @@
       text-transform: uppercase;
       color: #e5dac3;
       text-shadow: 0 3px 0 #1b0a04, 0 6px 16px rgba(0, 0, 0, 0.95);
-      transition: all 0.35s ease;
+      transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
       user-select: none;
     }
     .book-main-title:hover {
       color: #fffef0;
-      transform: scale(1.04);
+      transform: scale(1.03);
       text-shadow:
         0 0 14px rgba(254, 240, 138, 0.95),
-        0 0 32px rgba(250, 204, 21, 0.9),
-        0 0 60px rgba(245, 158, 11, 0.8),
+        0 0 30px rgba(250, 204, 21, 0.85),
         0 3px 2px #180702;
     }
 
-    /* =====================================================================
-       KHUNG ẢNH NGƯỜI CHIẾN SĨ TRÊN BÌA SÁCH (NẠP TỰ ĐỘNG TỪ THƯ MỤC)
-       ===================================================================== */
+    /* KHUNG ẢNH NGƯỜI CHIẾN SĨ TRÊN BÌA SÁCH */
     .cover-soldier-box {
       width: var(--cover-img-width);
       height: var(--cover-img-height);
       border-radius: var(--cover-img-radius);
       padding: 6px;
-      background:
-        radial-gradient(circle at center, rgba(45, 22, 10, 0.65) 0%, rgba(18, 7, 3, 0.92) 100%);
+      background: radial-gradient(circle at center, rgba(45, 22, 10, 0.65) 0%, rgba(18, 7, 3, 0.92) 100%);
       border: 2px solid rgba(205, 165, 75, 0.65);
       outline: 1px solid rgba(205, 165, 75, 0.25);
       outline-offset: -5px;
-      box-shadow:
-        inset 0 0 18px rgba(0, 0, 0, 0.85),
-        0 8px 20px rgba(0, 0, 0, 0.75);
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.85), 0 8px 20px rgba(0, 0, 0, 0.75);
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
       position: relative;
-      transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-    }
-
-    .cover-soldier-box:hover {
-      border-color: rgba(250, 204, 21, 0.88);
-      box-shadow:
-        inset 0 0 15px rgba(0, 0, 0, 0.7),
-        0 0 22px rgba(250, 204, 21, 0.35),
-        0 10px 24px rgba(0, 0, 0, 0.85);
-      transform: scale(1.02);
     }
 
     .cover-soldier-box img {
@@ -627,13 +599,7 @@
       height: 100%;
       object-fit: cover;
       border-radius: calc(var(--cover-img-radius) - 3px);
-      filter: sepia(18%) contrast(108%) brightness(92%) drop-shadow(0 4px 10px rgba(0,0,0,0.8));
-      transition: filter 0.4s ease, transform 0.4s ease;
-    }
-
-    .cover-soldier-box:hover img {
-      filter: sepia(8%) contrast(112%) brightness(102%);
-      transform: scale(1.03);
+      filter: sepia(15%) contrast(106%) brightness(95%);
     }
 
     .cover-soldier-placeholder {
@@ -644,16 +610,15 @@
       line-height: 1.5;
     }
 
-    /* GIẤY VÀNG NGẢ CỔ ĐIỂN CÓ VẾT Ố BỤI THỜI GIAN */
+    /* GIẤY VÀNG NGẢ CỔ ĐIỂN */
     .aged-paper {
       background:
-        radial-gradient(circle at 14% 86%, rgba(135, 95, 42, calc(0.16 + var(--dust-opacity) * 0.25)) 0%, transparent 45%),
-        radial-gradient(circle at 88% 12%, rgba(125, 85, 35, calc(0.14 + var(--dust-opacity) * 0.25)) 0%, transparent 42%),
-        radial-gradient(ellipse at 75% 78%, rgba(115, 78, 30, calc(var(--dust-opacity) * 0.22)) 0%, transparent 38%),
+        radial-gradient(circle at 14% 86%, rgba(135, 95, 42, calc(0.16 + var(--dust-opacity) * 0.22)) 0%, transparent 45%),
+        radial-gradient(circle at 88% 12%, rgba(125, 85, 35, calc(0.14 + var(--dust-opacity) * 0.22)) 0%, transparent 42%),
         radial-gradient(circle at center, #f8f0df 0%, #e8d3ab 70%, #cbb07d 100%);
       color: #2c1d11;
       font-family: 'Merriweather', Georgia, serif;
-      padding: 26px 30px;
+      padding: 24px 28px;
       border: 1px solid #b59868;
       display: flex;
       flex-direction: column;
@@ -663,16 +628,18 @@
     .sheet-front.aged-paper {
       border-radius: 0 10px 10px 0;
       box-shadow:
-        inset 28px 0 40px rgba(55, 32, 10, 0.30),
-        inset -4px 0 10px rgba(110, 75, 30, 0.28),
-        inset 0 0 35px rgba(120, 82, 35, 0.25);
+        inset 26px 0 36px rgba(55, 32, 10, 0.28),
+        inset -4px 0 10px rgba(110, 75, 30, 0.25);
     }
     .sheet-back.aged-paper {
       border-radius: 10px 0 0 10px;
       box-shadow:
-        inset -28px 0 40px rgba(55, 32, 10, 0.30),
-        inset 4px 0 10px rgba(110, 75, 30, 0.28),
-        inset 0 0 35px rgba(120, 82, 35, 0.25);
+        inset -26px 0 36px rgba(55, 32, 10, 0.28),
+        inset 4px 0 10px rgba(110, 75, 30, 0.25);
+    }
+
+    .book-3d.mobile-single-mode .sheet-front.aged-paper {
+      border-radius: 8px 12px 12px 8px;
     }
 
     .page-header-bar {
@@ -686,16 +653,17 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
     }
 
     .page-heading {
       font-family: 'Oswald', sans-serif;
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       color: #4a230f;
       text-transform: uppercase;
       letter-spacing: 1.5px;
       text-align: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       padding-bottom: 5px;
       border-bottom: 1px dashed rgba(120, 85, 45, 0.4);
     }
@@ -708,12 +676,15 @@
       margin-top: 8px;
       display: flex;
       justify-content: space-between;
+      flex-shrink: 0;
     }
 
     /* TRANG 1: NGƯỜI THỰC HIỆN */
     .credits-list {
       flex: 1;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
       display: flex;
       flex-direction: column;
       gap: 9px;
@@ -743,6 +714,8 @@
     .toc-list {
       flex: 1;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
       display: flex;
       flex-direction: column;
       gap: 9px;
@@ -756,7 +729,7 @@
       background: rgba(138, 98, 45, 0.08);
       border: 1px solid rgba(120, 85, 45, 0.22);
       cursor: pointer;
-      transition: all 0.25s ease;
+      transition: background 0.2s ease, transform 0.2s ease;
     }
     .toc-item:hover {
       background: rgba(180, 120, 40, 0.26);
@@ -767,7 +740,7 @@
     .toc-dots { flex: 1; border-bottom: 1px dotted rgba(90, 60, 30, 0.5); margin: 0 8px; }
     .toc-page-num { font-family: 'Oswald', sans-serif; font-size: 0.86rem; color: #6b3416; font-weight: bold; }
 
-    /* HỒ SƠ CỰU CHIẾN BINH (2 TRANG / NGƯỜI) */
+    /* HỒ SƠ CỰU CHIẾN BINH */
     .vet-photo-container {
       flex: 1;
       display: flex;
@@ -806,6 +779,7 @@
       border-radius: 8px;
       padding: 7px 10px;
       margin-bottom: 10px;
+      flex-shrink: 0;
     }
     .vet-audio-label {
       font-size: 0.74rem;
@@ -816,23 +790,64 @@
     }
     .vet-audio-player { width: 100%; height: 32px; outline: none; }
 
+    /* KHUNG CÂU CHUYỆN CÓ THANH CUỘN LÊN/XUỐNG NHƯ KHUNG TRÒ CHUYỆN */
     .vet-handwritten-story {
       flex: 1;
+      min-height: 0;
       font-family: 'Patrick Hand', cursive, serif;
       font-size: 1.15rem;
       line-height: 28px;
       color: #1f243d;
-      padding: 4px 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(120, 85, 45, 0.28);
+      border-radius: 8px;
+      background-color: rgba(255, 250, 238, 0.35);
       background-image: repeating-linear-gradient(
         to bottom,
         transparent 0px,
         transparent 27px,
-        rgba(120, 85, 45, 0.28) 28px
+        rgba(120, 85, 45, 0.25) 28px
       );
       background-attachment: local;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
       text-align: justify;
+      cursor: auto;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.08);
     }
+
+    .vet-handwritten-story::-webkit-scrollbar { width: 6px; }
+    .vet-handwritten-story::-webkit-scrollbar-track { background: rgba(120, 85, 45, 0.1); border-radius: 4px; }
+    .vet-handwritten-story::-webkit-scrollbar-thumb { background: rgba(107, 52, 22, 0.55); border-radius: 4px; }
+
+    /* BỐ CỤC GỘP 1 TRANG TRÊN ĐIỆN THOẠI */
+    .mobile-vet-combined {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .mobile-vet-top {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .mobile-vet-top .vet-portrait-frame {
+      width: 62%;
+      height: 145px;
+      margin: 0 auto;
+    }
+
+    .mobile-vet-top .vet-caption-name { font-size: 1.05rem; margin-top: 2px; }
+    .mobile-vet-top .vet-caption-unit { font-size: 0.76rem; }
 
     /* Thanh điều khiển nhỏ bên dưới khi sách đang mở */
     .book-controls {
@@ -843,7 +858,7 @@
       z-index: 48;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.5s ease;
+      transition: opacity 0.4s ease;
     }
     body.reading-mode .book-controls {
       opacity: 1;
@@ -857,12 +872,10 @@
       border-radius: 20px;
       font-size: 12.5px;
       cursor: pointer;
-      transition: all 0.25s ease;
     }
     .book-ctrl-btn:hover {
       background: #5a2c19;
       border-color: #facc15;
-      box-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
     }
 
     /* BẢNG ĐIỀU CHỈNH THÔNG SỐ ĐẦY ĐỦ */
@@ -898,79 +911,73 @@
     .btn-secondary { background: linear-gradient(135deg, #38bdf8, #0284c7); color: white; }
     .btn-danger { background: #ef4444; color: white; padding: 3px 8px; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; }
 
-    /* TỰ ĐỘNG TƯƠNG THÍCH CHO ĐIỆN THOẠI & MÁY TÍNH BẢNG */
-    @media (max-width: 960px) {
+    /* =====================================================================
+       GIAO DIỆN ĐIỆN THOẠI (<= 768px):
+       - Ẩn hoàn toàn 4 góc
+       - Sách nằm giữa, mở 1 trang trên 1 màn hình
+       ===================================================================== */
+    @media (max-width: 768px) {
       :root {
-        --book-page-width: 44vw;
-        --book-page-height: 64vh;
-        --book-open-zoom: 1.02;
-        --cover-img-height: 165px;
-      }
-      .book-main-title { font-size: 2.1rem; }
-      .aged-paper { padding: 16px 18px; }
-      .page-heading { font-size: 1.1rem; margin-bottom: 8px; }
-      .vet-portrait-frame { height: 180px; }
-      .vet-handwritten-story { font-size: 0.98rem; line-height: 24px; }
-      .book-controls { margin-top: 18px; gap: 8px; flex-wrap: wrap; justify-content: center; }
-      .book-ctrl-btn { padding: 6px 12px; font-size: 11.5px; }
-      .corner-wrapper { transform: scale(0.65); }
-    }
-
-    @media (max-width: 600px) {
-      :root {
-        --book-page-width: 46vw;
-        --book-page-height: 56vh;
+        --book-page-width: 90vw;
+        --book-page-height: 80dvh;
         --book-open-zoom: 1.0;
-        --cover-img-height: 130px;
+        --cover-img-height: 200px;
       }
-      .book-main-title { font-size: 1.55rem; letter-spacing: 1px; }
-      .cover-gold-frame { padding: 18px 10px; }
-      .aged-paper { padding: 12px 12px; }
-      .page-header-bar { font-size: 0.62rem; }
-      .page-heading { font-size: 0.95rem; }
-      .credit-role { font-size: 0.72rem; }
-      .credit-person { font-size: 0.8rem; }
-      .toc-title { font-size: 0.78rem; }
-      .toc-page-num { font-size: 0.72rem; }
-      .vet-portrait-frame { height: 135px; }
-      .vet-caption-name { font-size: 0.92rem; }
-      .vet-audio-label { font-size: 0.65rem; }
-      .vet-handwritten-story { font-size: 0.88rem; line-height: 22px; }
-      .corner-wrapper { transform: scale(0.48); }
+
+      .corner-wrapper {
+        display: none !important;
+      }
+
+      .book-main-title { font-size: 2.35rem; }
+      .leather-cover { padding: 18px; }
+      .cover-gold-frame { padding: 22px 14px; }
+      .aged-paper { padding: 16px 18px; }
+      .page-header-bar { font-size: 0.68rem; margin-bottom: 6px; }
+      .page-heading { font-size: 1.15rem; margin-bottom: 8px; }
+      .vet-audio-box { padding: 6px 8px; margin-bottom: 4px; }
+      .vet-audio-label { font-size: 0.68rem; }
+      .vet-audio-player { height: 30px; }
+
+      .vet-handwritten-story {
+        font-size: 1.05rem;
+        line-height: 26px;
+        padding: 8px 10px;
+        background-image: repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 25px,
+          rgba(120, 85, 45, 0.25) 26px
+        );
+      }
+
+      .book-controls {
+        margin-top: 14px;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .book-ctrl-btn { padding: 6px 13px; font-size: 12px; }
       .edit-banner { width: 95%; font-size: 10.5px; padding: 6px 10px; flex-wrap: wrap; justify-content: center; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Bộ lọc SVG tạo hiệu ứng sóng cờ động & hạt bụi film cổ điển -->
-  <svg width="0" height="0" style="position:absolute">
-    <filter id="waving-filter">
-      <feTurbulence id="turbulence" type="fractalNoise" baseFrequency="0.015 0.03" numOctaves="2" result="noise" />
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="12" xChannelSelector="R" yChannelSelector="G" />
-    </filter>
-    <filter id="dust-noise-filter">
-      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
-      <feColorMatrix type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0.14 0" />
-    </filter>
-  </svg>
-
   <!-- Hình nền số 5 -->
   <div class="bg-layer" id="bgLayer"></div>
   <div class="bg-overlay"></div>
 
-  <!-- Lớp phủ hạt bụi & vết ố cổ điển toàn không gian -->
+  <!-- Lớp phủ hạt bụi cổ điển nhẹ nhàng -->
   <div class="dust-vintage-layer"></div>
-  <div class="dust-grain-canvas"></div>
 
   <!-- Màn tối che mờ 4 góc và nền khi mở sách -->
   <div class="ambient-dark-backdrop"></div>
 
-  <!-- ĐÈN PIN CHIẾU SÁNG NHANH & TÔNG TRẮNG NGÀ TỰ NHIÊN -->
+  <!-- ĐÈN PIN CHẠY TRỰC TIẾP TRÊN GPU (SIÊU MƯỢT, KHÔNG REPAINT) -->
   <div class="flashlight-overlay-top" id="flashlightOverlayTop">
-    <div class="flashlight-bright-core"></div>
-    <div class="flashlight-three-levels"></div>
-    <div class="flashlight-lens-details"></div>
+    <div class="flashlight-gpu-mover" id="flashlightMover">
+      <div class="flashlight-gpu-ring"></div>
+    </div>
   </div>
 
   <!-- Thanh công cụ khi bật chế độ chỉnh sửa -->
@@ -980,13 +987,13 @@
     <button onclick="lockEditMode()" style="background:#f87171;color:white;border:none;padding:4px 10px;border-radius:12px;font-weight:bold;cursor:pointer;">Khóa lại</button>
   </div>
 
-  <!-- 1. Góc trên trái: Huy hiệu Đoàn -->
+  <!-- 1. Góc trên trái: Huy hiệu Đoàn (Mặc định mất màu -> Đưa chuột vào sáng màu) -->
   <div class="corner-wrapper wrap-tl" id="wrap-tl" data-key="tl">
     <img src="image_c4447e.png" alt="Huy hiệu Đoàn" class="corner-img" id="item-tl" onerror="handleImgError(this)">
     <div class="resize-handle" data-key="tl"></div>
   </div>
 
-  <!-- 2. Góc trên phải: Cờ Việt Nam -->
+  <!-- 2. Góc trên phải: Cờ Việt Nam (Mặc định mất màu -> Đưa chuột vào sáng màu) -->
   <div class="corner-wrapper wrap-tr" id="wrap-tr" data-key="tr" title="Nhấn vào lá cờ để bật hiệu ứng">
     <div class="flag-clip-box">
       <img src="image_c44ec3.png" alt="Cờ Tĩnh" class="corner-img tr-static" id="item-tr" onerror="handleImgError(this)">
@@ -996,13 +1003,13 @@
     <div class="resize-handle" data-key="tr"></div>
   </div>
 
-  <!-- 3. Góc dưới trái: Trống đồng -->
+  <!-- 3. Góc dưới trái: Trống đồng (Mặc định mất màu -> Đưa chuột vào sáng màu) -->
   <div class="corner-wrapper wrap-bl" id="wrap-bl" data-key="bl" title="Nhấn vào trống đồng để bật hiệu ứng">
     <img src="image_c29128.png" alt="Trống đồng" class="corner-img" id="item-bl" onerror="handleImgError(this)">
     <div class="resize-handle" data-key="bl"></div>
   </div>
 
-  <!-- 4. Góc dưới phải: Tượng chiến sĩ -->
+  <!-- 4. Góc dưới phải: Tượng chiến sĩ (Mặc định mất màu -> Đưa chuột vào sáng màu) -->
   <div class="corner-wrapper wrap-br" id="wrap-br" data-key="br">
     <img src="image_c447c1.png" alt="Tượng chiến sĩ" class="corner-img" id="item-br" onerror="handleImgError(this)">
     <div class="resize-handle" data-key="br"></div>
@@ -1074,17 +1081,17 @@
       <label>Vị trí Dọc (Y): <span id="val-y">24px</span></label>
       <input type="range" id="inp-y" min="-800" max="1200" value="24" oninput="updateCorner()">
 
-      <label>Độ rõ (Opacity): <span id="val-opacity">0.88</span></label>
-      <input type="range" id="inp-opacity" min="0.05" max="1" step="0.05" value="0.88" oninput="updateCorner()">
+      <label>Độ rõ khi đứng yên (Opacity): <span id="val-opacity">0.42</span></label>
+      <input type="range" id="inp-opacity" min="0.05" max="1" step="0.05" value="0.42" oninput="updateCorner()">
 
       <label>Độ nhòe (Blur): <span id="val-blur">0px</span></label>
       <input type="range" id="inp-blur" min="0" max="6" step="0.2" value="0" oninput="updateCorner()">
 
-      <label>Độ sáng (Brightness): <span id="val-bright">100%</span></label>
-      <input type="range" id="inp-bright" min="30" max="200" value="100" oninput="updateCorner()">
+      <label>Độ sáng (Brightness): <span id="val-bright">85%</span></label>
+      <input type="range" id="inp-bright" min="30" max="200" value="85" oninput="updateCorner()">
 
-      <label>Độ tương phản (Contrast): <span id="val-contrast">110%</span></label>
-      <input type="range" id="inp-contrast" min="80" max="300" value="110" oninput="updateCorner()">
+      <label>Độ tương phản (Contrast): <span id="val-contrast">145%</span></label>
+      <input type="range" id="inp-contrast" min="80" max="300" value="145" oninput="updateCorner()">
 
       <label><strong>Độ tối hình nền số 5:</strong> <span id="val-bg">0.80</span></label>
       <input type="range" id="inp-bg" min="0.3" max="0.96" step="0.02" value="0.80" oninput="updateBg()">
@@ -1093,14 +1100,14 @@
     <!-- 2. TÙY CHỈNH BÌA SÁCH, KHUNG ẢNH CHIẾN SĨ TRÊN BÌA, ĐỘ BỤI CŨ KỸ -->
     <div class="control-group">
       <label><strong style="color:#facc15;">📖 2. Tùy chỉnh Bìa Sách & Khung Ảnh Chiến Sĩ:</strong></label>
-      <label>Độ phủ bụi & Cũ kỹ (Dust): <span id="val-dust">0.32</span></label>
-      <input type="range" id="inp-dust" min="0" max="0.85" step="0.02" value="0.32" oninput="updateDustSetting()">
+      <label>Độ phủ bụi & Cũ kỹ (Dust): <span id="val-dust">0.28</span></label>
+      <input type="range" id="inp-dust" min="0" max="0.85" step="0.02" value="0.28" oninput="updateDustSetting()">
 
-      <label>Độ sáng sách khi chưa mở: <span id="val-book-bright">0.68</span></label>
-      <input type="range" id="inp-book-bright" min="0.25" max="1.2" step="0.05" value="0.68" oninput="updateBookSettings()">
+      <label>Độ sáng sách khi chưa mở: <span id="val-book-bright">0.72</span></label>
+      <input type="range" id="inp-book-bright" min="0.25" max="1.2" step="0.05" value="0.72" oninput="updateBookSettings()">
 
-      <label>Độ phóng to nâng sách khi mở (Zoom): <span id="val-book-zoom">1.15x</span></label>
-      <input type="range" id="inp-book-zoom" min="0.8" max="1.6" step="0.02" value="1.15" oninput="updateBookSettings()">
+      <label>Độ phóng to nâng sách khi mở (Zoom): <span id="val-book-zoom">1.12x</span></label>
+      <input type="range" id="inp-book-zoom" min="0.8" max="1.6" step="0.02" value="1.12" oninput="updateBookSettings()">
 
       <label>Chiều rộng Khung ảnh bìa: <span id="val-cover-w">82%</span></label>
       <input type="range" id="inp-cover-w" min="40" max="96" step="1" value="82" oninput="updateCoverFrameSettings()">
@@ -1128,7 +1135,7 @@
       <button class="btn-action btn-secondary" onclick="addCreditRow()">+ Thêm hạng mục & người thực hiện</button>
     </div>
 
-    <!-- 4. CÁC TRANG SAU: HỒ SƠ CỰU CHIẾN BINH (2 TRANG/NGƯỜI) -->
+    <!-- 4. CÁC TRANG SAU: HỒ SƠ CỰU CHIẾN BINH -->
     <div class="control-group">
       <label><strong style="color:#4ade80;">🎖️ 4. Hồ sơ Cựu Chiến Binh (Tự cập nhật Mục lục):</strong></label>
       <select id="vetSelect" onchange="loadSelectedVetEditor()"></select>
@@ -1140,7 +1147,7 @@
         <input type="text" id="inpVetUnit" class="input-field" placeholder="VD: Cựu chiến binh Sư đoàn 308..." oninput="saveCurrentVetInfo()">
 
         <div class="file-row">
-          <span>🖼️ Ảnh chân dung (Trang lẻ):</span>
+          <span>🖼️ Ảnh chân dung:</span>
           <input type="file" accept="image/*" onchange="uploadVetPhoto(event)">
         </div>
 
@@ -1152,12 +1159,12 @@
         <label>Hoặc điền tên file/link ghi âm (.mp3):</label>
         <input type="text" id="inpVetAudioUrl" class="input-field" placeholder="VD: giong_bac_a.mp3" oninput="saveCurrentVetAudioUrl()">
 
-        <label>✍️ Câu chuyện chép tay (Trang chẵn):</label>
+        <label>✍️ Câu chuyện chép tay (Tự động cuộn khi dài):</label>
         <textarea id="inpVetStory" class="input-field" rows="4" placeholder="Nhập câu chuyện của cựu chiến binh..." oninput="saveCurrentVetInfo()"></textarea>
 
         <button class="btn-danger" onclick="deleteCurrentVet()">🗑️ Xóa hồ sơ cựu chiến binh này</button>
       </div>
-      <button class="btn-action" onclick="addNewVeteran()">+ Thêm Cựu Chiến Binh mới (Tự tạo 2 trang)</button>
+      <button class="btn-action" onclick="addNewVeteran()">+ Thêm Cựu Chiến Binh mới</button>
     </div>
 
     <!-- 5. NẠP ẢNH 4 GÓC & HÌNH NỀN -->
@@ -1181,10 +1188,8 @@
     const ADMIN_PIN   = "1234";
 
     let isEditMode = localStorage.getItem('ls_edit_granted') === 'true';
-    let flagWaveInterval = null;
-    let wavePhase = 0;
+    let isMobileSinglePage = window.innerWidth <= 768;
 
-    // Danh sách các tên file ảnh người chiến sĩ trong thư mục sẽ được tự động thử lần lượt
     const COVER_SOLDIER_CANDIDATES = [
       'nguoi_linh.png',
       'nguoi_linh.jpg',
@@ -1194,9 +1199,8 @@
       'chiensi.jpg'
     ];
 
-    // 1. DỮ LIỆU SÁCH & LẬT TRANG TUẦN TỰ
     const defaultBookData = {
-      coverSoldierImg: "nguoi_linh.jpg", // Mặc định tự tìm file nguoi_linh.png trong thư mục
+      coverSoldierImg: "nguoi_linh.png",
       credits: [
         { role: "Chịu trách nhiệm nội dung & Ý tưởng", person: "Lê Việt Hưng" },
         { role: "Sưu tầm tư liệu & Phỏng vấn nhân chứng", person: "Nhóm Thực Hiện Dự Án" },
@@ -1209,14 +1213,14 @@
           unit: "Chiến sĩ Chiến dịch Hồ Chí Minh (1975)",
           photo: "",
           audio: "",
-          story: "Những ngày tháng Tư lịch sử năm 1975, đơn vị chúng tôi hành quân thần tốc tiến về Sài Gòn. Giữa tiếng pháo rền vang và bụi đường đỏ quạch, anh em vẫn nắm chặt tay nhau hẹn ngày thống nhất..."
+          story: "Những ngày tháng Tư lịch sử năm 1975, đơn vị chúng tôi hành quân thần tốc tiến về Sài Gòn. Giữa tiếng pháo rền vang và bụi đường đỏ quạch, anh em vẫn nắm chặt tay nhau hẹn ngày thống nhất.\n\nKhi cánh quân tiến qua cửa ngõ thành phố, nhân dân hai bên đường ùa ra vẫy cờ hoa đón chào. Những giọt nước mắt hạnh phúc hòa lẫn với mồ hôi sau bao năm tháng gian khổ nơi chiến trường..."
         },
         {
           name: "Cựu chiến binh Trần Minh Đức",
           unit: "Bộ đội Trường Sơn - Đoàn 559",
           photo: "",
           audio: "",
-          story: "Đường Trường Sơn mùa mưa lầy lội, những đêm trắng giữ từng chuyến xe qua trọng điểm bom tọa độ. Mỗi dấu chân in trên sườn núi là một kỷ niệm không bao giờ quên của tuổi đôi mươi..."
+          story: "Đường Trường Sơn mùa mưa lầy lội, những đêm trắng giữ từng chuyến xe qua trọng điểm bom tọa độ. Mỗi dấu chân in trên sườn núi là một kỷ niệm không bao giờ quên của tuổi đôi mươi.\n\nCó những đêm mưa rừng xối xả, anh em chia nhau từng ngụm nước, từng miếng lương khô nhưng tiếng hát vẫn át tiếng bom rơi..."
         }
       ]
     };
@@ -1244,7 +1248,6 @@
         .replace(/"/g, "&quot;");
     }
 
-    // Tự động dò tìm ảnh người chiến sĩ trong thư mục nếu tên file đầu tiên chưa khớp
     function handleCoverSoldierError(imgEl) {
       const idx = Number(imgEl.dataset.tryIndex || 0);
       if (idx < COVER_SOLDIER_CANDIDATES.length) {
@@ -1263,8 +1266,167 @@
       if (ph) ph.style.display = 'none';
     }
 
+    // =========================================================================
+    // PHÂN TÁCH RÕ CHẾ ĐỘ MÁY TÍNH (MỞ 2 TRANG) & ĐIỆN THOẠI (MỞ 1 TRANG Ở GIỮA)
+    // =========================================================================
     function renderBookDOM() {
+      isMobileSinglePage = window.innerWidth <= 768;
       const bookEl = document.getElementById('book3D');
+      bookEl.classList.toggle('mobile-single-mode', isMobileSinglePage);
+
+      if (isMobileSinglePage) {
+        renderMobileSinglePageBook(bookEl);
+      } else {
+        renderDesktopSpreadBook(bookEl);
+      }
+      updateBookState();
+    }
+
+    // 1. CHẾ ĐỘ ĐIỆN THOẠI (<= 768px): Mở 1 trang ở giữa, gộp Ảnh trên + Ghi âm giữa + Chuyện cuộn dưới
+    function renderMobileSinglePageBook(bookEl) {
+      const vets = bookData.veterans;
+      totalSheets = vets.length + 3;
+
+      if (currentSheetIndex >= totalSheets) {
+        currentSheetIndex = 0;
+      }
+
+      const creditsHtml = bookData.credits.map((item) => `
+        <div class="credit-card">
+          <div class="credit-role">${escapeHtml(item.role)}</div>
+          <div class="credit-person">${escapeHtml(item.person)}</div>
+        </div>
+      `).join('');
+
+      const coverSrc = bookData.coverSoldierImg || 'nguoi_linh.png';
+      let html = '';
+
+      // TỜ 0: BÌA SÁCH
+      html += `
+        <div class="book-sheet" id="sheet-0" onclick="handleSheetClick(0, event)">
+          <div class="sheet-face sheet-front leather-cover">
+            <div class="cover-spine"></div>
+            <div class="cover-gold-frame">
+              <div style="font-size:0.7rem; letter-spacing:2.5px; color:rgba(214,176,84,0.75); text-transform:uppercase;">
+                Tư Liệu & Ký Ức Lịch Sử
+              </div>
+              <h1 class="book-main-title">DẤU CHÂN<br>NGƯỜI LÍNH</h1>
+              <div class="cover-soldier-box">
+                <img id="coverSoldierImg"
+                     src="${escapeHtml(coverSrc)}"
+                     data-try-index="0"
+                     alt="Người chiến sĩ"
+                     onload="handleCoverSoldierLoad(this)"
+                     onerror="handleCoverSoldierError(this)">
+                <div id="coverSoldierPlaceholder" class="cover-soldier-placeholder" style="display:none;">
+                  [ Khung ảnh Người Chiến Sĩ ]<br>
+                  Lưu ảnh vào thư mục với tên <strong>nguoi_linh.png</strong>
+                </div>
+              </div>
+              <div style="font-size:0.7rem; letter-spacing:2px; color:rgba(214,176,84,0.65);">Chạm vào bìa để mở sách ▶</div>
+            </div>
+          </div>
+          <div class="sheet-face sheet-back leather-cover"></div>
+        </div>
+      `;
+
+      // TỜ 1: TRANG 1 - NGƯỜI THỰC HIỆN
+      html += `
+        <div class="book-sheet" id="sheet-1" onclick="handleSheetClick(1, event)">
+          <div class="sheet-face sheet-front aged-paper">
+            <div>
+              <div class="page-header-bar"><span>Dấu Chân Người Lính</span><span>Trang 1</span></div>
+              <h2 class="page-heading">Người Thực Hiện</h2>
+            </div>
+            <div class="credits-list" onclick="event.stopPropagation()">${creditsHtml}</div>
+            <div class="page-footer-bar"><span>Nhóm Dự Án</span><span>Chạm viền trang để sang Mục lục ▶</span></div>
+          </div>
+          <div class="sheet-face sheet-back aged-paper"></div>
+        </div>
+      `;
+
+      // TỜ 2: TRANG 2 - MỤC LỤC
+      const tocItemsHtml = vets.map((vet, vIdx) => {
+        const targetSheet = vIdx + 3;
+        const displayPageNum = vIdx + 3;
+        return `
+          <div class="toc-item" onclick="jumpToSheet(${targetSheet}, event)">
+            <span class="toc-title">${vIdx + 1}. ${escapeHtml(vet.name)}</span>
+            <span class="toc-dots"></span>
+            <span class="toc-page-num">Trang ${displayPageNum}</span>
+          </div>
+        `;
+      }).join('');
+
+      html += `
+        <div class="book-sheet" id="sheet-2" onclick="handleSheetClick(2, event)">
+          <div class="sheet-face sheet-front aged-paper">
+            <div>
+              <div class="page-header-bar"><span>Danh Mục Nhân Chứng</span><span>Trang 2</span></div>
+              <h2 class="page-heading">Mục Lục</h2>
+              <p style="font-size:0.72rem; color:#6b3416; text-align:center; font-style:italic; margin-bottom:8px;">
+                (Chạm vào tên nhân chứng để chuyển đến trang đó)
+              </p>
+            </div>
+            <div class="toc-list">${tocItemsHtml}</div>
+            <div class="page-footer-bar"><span>✦</span><span>Chạm viền trang để lật tiếp ▶</span></div>
+          </div>
+          <div class="sheet-face sheet-back aged-paper"></div>
+        </div>
+      `;
+
+      // TỜ 3..N+2: HỒ SƠ CỰU CHIẾN BINH GỘP 1 TRANG
+      vets.forEach((vet, vIdx) => {
+        const sheetIdx = vIdx + 3;
+        const pageNum = vIdx + 3;
+        const isLast = (sheetIdx === totalSheets - 1);
+        const footerRight = isLast ? "✦ Trang cuối - Chạm để gập sách" : `Chạm để sang Trang ${pageNum + 1} ▶`;
+
+        html += `
+          <div class="book-sheet" id="sheet-${sheetIdx}" onclick="handleSheetClick(${sheetIdx}, event)">
+            <div class="sheet-face sheet-front aged-paper">
+              <div class="page-header-bar">
+                <span>Hồ Sơ Nhân Chứng</span>
+                <span>Trang ${pageNum}</span>
+              </div>
+
+              <div class="mobile-vet-combined">
+                <div class="mobile-vet-top">
+                  <div class="vet-portrait-frame">
+                    ${vet.photo
+                      ? `<img src="${vet.photo}" alt="${escapeHtml(vet.name)}">`
+                      : `<span class="vet-placeholder">[ Ảnh: ${escapeHtml(vet.name)} ]</span>`
+                    }
+                  </div>
+                  <div class="vet-caption-name">${escapeHtml(vet.name)}</div>
+                  <div class="vet-caption-unit">${escapeHtml(vet.unit)}</div>
+                </div>
+
+                <div class="vet-audio-box" onclick="event.stopPropagation()">
+                  <div class="vet-audio-label">🔊 Ghi âm giọng kể:</div>
+                  <audio class="vet-audio-player" controls preload="auto" src="${vet.audio || ''}"></audio>
+                </div>
+
+                <div class="vet-handwritten-story" onclick="event.stopPropagation()">
+                  ${escapeHtml(vet.story).replace(/\n/g, '<br>')}
+                </div>
+              </div>
+
+              <div class="page-footer-bar">
+                <span>Trang ${pageNum}</span>
+                <span>${footerRight}</span>
+              </div>
+            </div>
+            <div class="sheet-face sheet-back aged-paper"></div>
+          </div>
+        `;
+      });
+
+      bookEl.innerHTML = html;
+    }
+
+    // 2. CHẾ ĐỘ MÁY TÍNH (> 768px): Mở 2 trang chuẩn xác, không bao giờ bị ngược trang 1 hay trang 3
+    function renderDesktopSpreadBook(bookEl) {
       const vets = bookData.veterans;
       totalSheets = vets.length + 2;
 
@@ -1274,7 +1436,6 @@
 
       let html = '';
 
-      // TỜ 0: Mặt trước = Bìa Trước (Có Khung ảnh người chiến sĩ lấy từ thư mục) | Mặt sau = Trang 1 (Người thực hiện)
       const creditsHtml = bookData.credits.map((item) => `
         <div class="credit-card">
           <div class="credit-role">${escapeHtml(item.role)}</div>
@@ -1284,6 +1445,7 @@
 
       const coverSrc = bookData.coverSoldierImg || 'nguoi_linh.png';
 
+      // TỜ 0: Mặt trước = Bìa Trước | Mặt sau = Trang 1 (Người thực hiện)
       html += `
         <div class="book-sheet" id="sheet-0" onclick="handleSheetClick(0, event)">
           <div class="sheet-face sheet-front leather-cover">
@@ -1313,13 +1475,13 @@
               <div class="page-header-bar"><span>Dấu Chân Người Lính</span><span>Trang 1</span></div>
               <h2 class="page-heading">Người Thực Hiện</h2>
             </div>
-            <div class="credits-list">${creditsHtml}</div>
-            <div class="page-footer-bar"><span>Nhóm Dự Án Lịch Sử</span><span>◀ Nhấn để gấp bìa</span></div>
+            <div class="credits-list" onclick="event.stopPropagation()">${creditsHtml}</div>
+            <div class="page-footer-bar"><span>Nhóm Dự Án Lịch Sử</span><span>◀ Nhấn viền để gấp bìa</span></div>
           </div>
         </div>
       `;
 
-      // MỤC LỤC (TRANG 2 - CHỈ KHI NHẤN CHUỘT MỚI DỊCH CHUYỂN)
+      // MỤC LỤC (TRANG 2)
       const tocItemsHtml = vets.map((vet, vIdx) => {
         const targetSheet = vIdx + 2;
         const displayPageNum = (vIdx * 2) + 3;
@@ -1339,6 +1501,7 @@
         let frontHtml = '';
         let backHtml  = '';
 
+        // Mặt trước của Tờ s (Trang chẵn nằm bên phải: Trang 2, Trang 4, Trang 6...)
         if (s === 1) {
           frontHtml = `
             <div class="sheet-face sheet-front aged-paper">
@@ -1350,7 +1513,7 @@
                 </p>
               </div>
               <div class="toc-list">${tocItemsHtml}</div>
-              <div class="page-footer-bar"><span>✦</span><span>Nhấn trang để sang Trang 3 ▶</span></div>
+              <div class="page-footer-bar"><span>✦</span><span>Nhấn viền trang để sang Trang 3 ▶</span></div>
             </div>
           `;
         } else {
@@ -1359,8 +1522,8 @@
           const pageNum = (vetIdx * 2) + 4;
           const isLastPage = (s === totalSheets - 1);
           const footerRight = isLastPage
-            ? "✦ Trang cuối - Nhấn để gập sách"
-            : `Nhấn để sang Trang ${pageNum + 1} ▶`;
+            ? "✦ Trang cuối - Nhấn viền trang để gập sách"
+            : `Nhấn viền trang để sang Trang ${pageNum + 1} ▶`;
 
           frontHtml = `
             <div class="sheet-face sheet-front aged-paper">
@@ -1372,7 +1535,7 @@
                 <div class="vet-audio-label">🔊 Ghi âm giọng kể: ${escapeHtml(vet.name)}</div>
                 <audio class="vet-audio-player" controls preload="auto" src="${vet.audio || ''}"></audio>
               </div>
-              <div class="vet-handwritten-story">
+              <div class="vet-handwritten-story" onclick="event.stopPropagation()">
                 ${escapeHtml(vet.story).replace(/\n/g, '<br>')}
               </div>
               <div class="page-footer-bar">
@@ -1383,6 +1546,7 @@
           `;
         }
 
+        // Mặt sau của Tờ s (Trang lẻ nằm bên trái sau khi lật: Trang 3, Trang 5, Trang 7...)
         if (s <= vets.length) {
           const vetIdx = s - 1;
           const vet = vets[vetIdx];
@@ -1404,7 +1568,7 @@
                 <div class="vet-caption-unit">${escapeHtml(vet.unit)}</div>
               </div>
               <div class="page-footer-bar">
-                <span>◀ Nhấn để lật lại</span>
+                <span>◀ Nhấn viền để lật lại</span>
                 <span>Trang ${pageNum}</span>
               </div>
             </div>
@@ -1426,7 +1590,6 @@
       }
 
       bookEl.innerHTML = html;
-      updateBookState();
     }
 
     function updateBookState() {
@@ -1449,7 +1612,6 @@
         document.body.classList.add('reading-mode');
         document.getElementById('wrap-tr').classList.remove('flag-active');
         document.getElementById('wrap-bl').classList.remove('drum-active');
-        clearInterval(flagWaveInterval);
       } else {
         bookEl.classList.remove('book-open');
         document.body.classList.remove('reading-mode');
@@ -1458,7 +1620,12 @@
     }
 
     function handleSheetClick(sheetIdx, event) {
-      if (event.target.tagName === 'AUDIO' || event.target.closest('.vet-audio-box') || event.target.closest('.toc-item')) {
+      if (
+        event.target.tagName === 'AUDIO' ||
+        event.target.closest('.vet-audio-box') ||
+        event.target.closest('.toc-item') ||
+        event.target.closest('.vet-handwritten-story')
+      ) {
         return;
       }
 
@@ -1482,7 +1649,7 @@
 
     function goToTocSpread(event) {
       if (event) event.stopPropagation();
-      currentSheetIndex = 1;
+      currentSheetIndex = isMobileSinglePage ? 2 : 1;
       updateBookState();
     }
 
@@ -1510,7 +1677,18 @@
       updateBookState();
     }
 
-    // ĐÈN PIN DI CHUYỂN NHANH BÁM SÁT CON TRỎ CHUỘT (TỐC ĐỘ 0.68)
+    window.addEventListener('resize', () => {
+      const nowMobile = window.innerWidth <= 768;
+      if (nowMobile !== isMobileSinglePage) {
+        currentSheetIndex = 0;
+        renderBookDOM();
+      }
+    });
+
+    // =========================================================================
+    // ĐÈN PIN GPU SIÊU MƯỢT (DÙNG TRANSLATE3D TRỰC TIẾP, KHÔNG REPAINT MÀN HÌNH)
+    // =========================================================================
+    const flashlightMover = document.getElementById('flashlightMover');
     let targetSpotX = window.innerWidth / 2;
     let targetSpotY = window.innerHeight / 2;
     let currentSpotX = targetSpotX;
@@ -1518,10 +1696,9 @@
 
     function updateFlashlightPosition() {
       if (document.body.classList.contains('reading-mode')) {
-        currentSpotX += (targetSpotX - currentSpotX) * 0.68;
-        currentSpotY += (targetSpotY - currentSpotY) * 0.68;
-        document.documentElement.style.setProperty('--spot-x', currentSpotX.toFixed(1) + 'px');
-        document.documentElement.style.setProperty('--spot-y', currentSpotY.toFixed(1) + 'px');
+        currentSpotX += (targetSpotX - currentSpotX) * 0.72;
+        currentSpotY += (targetSpotY - currentSpotY) * 0.72;
+        flashlightMover.style.transform = `translate3d(${currentSpotX.toFixed(1)}px, ${currentSpotY.toFixed(1)}px, 0)`;
       }
       requestAnimationFrame(updateFlashlightPosition);
     }
@@ -1530,7 +1707,7 @@
     window.addEventListener('mousemove', (e) => {
       targetSpotX = e.clientX;
       targetSpotY = e.clientY;
-    });
+    }, { passive: true });
 
     window.addEventListener('touchmove', (e) => {
       if (e.touches && e.touches.length > 0) {
@@ -1546,7 +1723,9 @@
       }
     }, { passive: true });
 
-    // 2. QUẢN LÝ KHUNG ẢNH BÌA, TRANG 1, ĐỘ PHỦ BỤI & CỰU CHIẾN BINH
+    // =========================================================================
+    // QUẢN LÝ KHUNG ẢNH BÌA, TRANG 1, ĐỘ PHỦ BỤI & CỰU CHIẾN BINH
+    // =========================================================================
     function updateCoverFrameSettings() {
       const w = document.getElementById('inp-cover-w').value;
       const h = document.getElementById('inp-cover-h').value;
@@ -1615,7 +1794,7 @@
     function renderVeteranSelector() {
       const sel = document.getElementById('vetSelect');
       sel.innerHTML = bookData.veterans.map((v, idx) => `
-        <option value="${idx}">Hồ sơ ${idx + 1}: ${escapeHtml(v.name)} (Trang ${idx*2+3} - ${idx*2+4})</option>
+        <option value="${idx}">Hồ sơ ${idx + 1}: ${escapeHtml(v.name)}</option>
       `).join('');
       loadSelectedVetEditor();
     }
@@ -1639,7 +1818,7 @@
       vet.story = document.getElementById('inpVetStory').value;
       saveBookData();
       renderBookDOM();
-      document.getElementById('vetSelect').options[idx].text = `Hồ sơ ${idx + 1}: ${vet.name} (Trang ${idx*2+3} - ${idx*2+4})`;
+      document.getElementById('vetSelect').options[idx].text = `Hồ sơ ${idx + 1}: ${vet.name}`;
     }
 
     function saveCurrentVetAudioUrl() {
@@ -1757,13 +1936,13 @@
 
     const root = document.documentElement;
     const defaultState = {
-      tl: { size: 140, zoom: 1.35, x: 24, y: 24, opacity: 0.90, blur: 0, bright: 100, contrast: 105, radius: 0 },
-      tr: { size: 175, zoom: 1.45, x: 24, y: 24, opacity: 0.88, blur: 0, bright: 100, contrast: 110, radius: 16 },
-      bl: { size: 205, zoom: 1.45, x: 24, y: 24, opacity: 0.40, blur: 1, bright: 85,  contrast: 190, radius: 105 },
-      br: { size: 205, zoom: 1.35, x: 24, y: 16, opacity: 0.92, blur: 0, bright: 100, contrast: 108, radius: 0 }
+      tl: { size: 140, zoom: 1.35, x: 24, y: 24, opacity: 0.45, blur: 0, bright: 90, contrast: 135, radius: 0 },
+      tr: { size: 175, zoom: 1.45, x: 24, y: 24, opacity: 0.42, blur: 0, bright: 85, contrast: 145, radius: 16 },
+      bl: { size: 205, zoom: 1.45, x: 24, y: 24, opacity: 0.40, blur: 0, bright: 85, contrast: 185, radius: 105 },
+      br: { size: 205, zoom: 1.35, x: 24, y: 16, opacity: 0.50, blur: 0, bright: 90, contrast: 135, radius: 0 }
     };
 
-    let state = JSON.parse(localStorage.getItem('ls_corner_state_v4') || 'null') || defaultState;
+    let state = JSON.parse(localStorage.getItem('ls_corner_state_v5') || 'null') || defaultState;
 
     let activeDragKey = null;
     let isResizingCorner = false;
@@ -1800,7 +1979,7 @@
         document.getElementById('targetSelect').value = key;
         applyAllStateToCSS();
         loadTargetValues();
-        localStorage.setItem('ls_corner_state_v4', JSON.stringify(state));
+        localStorage.setItem('ls_corner_state_v5', JSON.stringify(state));
       }, { passive: false });
 
       wrapper.addEventListener('click', (e) => {
@@ -1811,18 +1990,6 @@
         }
         if (key === 'tr') {
           wrapper.classList.toggle('flag-active');
-          const turbulence = document.getElementById('turbulence');
-          if (wrapper.classList.contains('flag-active')) {
-            clearInterval(flagWaveInterval);
-            flagWaveInterval = setInterval(() => {
-              wavePhase += 0.05;
-              const freqX = 0.015 + Math.sin(wavePhase) * 0.005;
-              const freqY = 0.03 + Math.cos(wavePhase) * 0.006;
-              turbulence.setAttribute('baseFrequency', `${freqX.toFixed(4)} ${freqY.toFixed(4)}`);
-            }, 40);
-          } else {
-            clearInterval(flagWaveInterval);
-          }
         }
         if (key === 'bl') {
           wrapper.classList.toggle('drum-active');
@@ -1854,7 +2021,7 @@
 
     window.addEventListener('mouseup', () => {
       if (activeDragKey) {
-        localStorage.setItem('ls_corner_state_v4', JSON.stringify(state));
+        localStorage.setItem('ls_corner_state_v5', JSON.stringify(state));
         activeDragKey = null;
         isResizingCorner = false;
       }
@@ -1910,7 +2077,7 @@
 
       applyAllStateToCSS();
       updateLabels(s);
-      localStorage.setItem('ls_corner_state_v4', JSON.stringify(state));
+      localStorage.setItem('ls_corner_state_v5', JSON.stringify(state));
     }
 
     function updateLabels(s) {
